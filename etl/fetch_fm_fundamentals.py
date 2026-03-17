@@ -75,24 +75,22 @@ def fetch_ticker_ratios(ticker: str) -> dict | None:
                               "FM API: no active=true ratios entry found")
             return None
 
-        # DEBUG: log all keys and values for first ticker to find PBV field name
-        if ticker == "SBER":
-            log.info(f"DEBUG SBER active_entry keys: {sorted(active_entry.keys())}")
-            # Log all non-None numeric-looking values
-            for k, v in sorted(active_entry.items()):
-                if v is not None and k not in ("id", "stock_id", "active", "period", "created_at", "updated_at"):
-                    log.info(f"DEBUG SBER {k} = {v}")
-
         # Extract metrics
         result = {}
+        # FM API v2 field names (discovered via debug logging):
+        #   pe, pbv, ps, pfcf, pcf, evebitda, ev_ebit, evs,
+        #   debt_ratio, debt_equity, roe, roa, roic, roce,
+        #   net_margin, ebitda_margin, gross_margin, operation_margin,
+        #   capex_revenue, capital, dpr, interest_coverage, ros
         field_map = {
-            "pe": "pe", "pb": "pbv", "ps": "ps",
-            "ev_ebitda": "evebitda", "ev_ebit": "ev_ebit",
+            "pe": "pe", "pbv": "pbv", "ps": "ps",
+            "evebitda": "evebitda", "ev_ebit": "ev_ebit",
             "debt_ratio": "debt_ratio", "debt_equity": "debt_equity",
             "roe": "roe", "roa": "roa", "roic": "roic",
             "net_margin": "net_margin", "ebitda_margin": "ebitda_margin",
-            "pfcf": "pfcf", "dividend_yield": "fm_div_yield",
-            "market_cap": "market_cap",
+            "gross_margin": "gross_margin", "operation_margin": "operation_margin",
+            "pfcf": "pfcf", "pcf": "pcf", "dpr": "dpr",
+            "capex_revenue": "capex_revenue", "capital": "capital",
         }
 
         for fm_key, our_key in field_map.items():
