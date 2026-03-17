@@ -81,10 +81,13 @@ def fetch_key_rate() -> list[dict]:
         resp.raise_for_status()
         html = resp.text
 
+        # Parse HTML table: Date | Rate
+        # Find last row with rate value
         pattern = r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*([\d,\.]+)'
         matches = re.findall(pattern, html)
 
         if matches:
+            # Last entry is the current rate
             date_str, rate_str = matches[-1]
             rate = float(rate_str.replace(",", "."))
             log.info(f"KEY_RATE = {rate}% (from {date_str})")
@@ -107,30 +110,53 @@ def fetch_key_rate() -> list[dict]:
 
 # ── 3. RUONIA ──────────────────────────────────────────────────────
 def fetch_ruonia() -> list[dict]:
-    """Fetch RUONIA rate from CBR."""
+    """Fetch RUONIA rate from CBR.
+    CBR RUONIA page uses a TRANSPOSED table:
+      Row 0: "Дата ставки"            | 13.03.2026 | 16.03.2026
+      Row 1: "Ставка RUONIA, % годовых" | 14,85      | 14,81
+    We extract dates from row 0 and rates from row 1, take the last column.
+    """
     url = "https://www.cbr.ru/hd_base/ruonia/"
     try:
         resp = requests.get(url, timeout=15,
                             headers={"User-Agent": "IDP-ETL/1.0"})
         resp.raise_for_status()
+        html = resp.text
 
-        pattern = r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*(-?[\d]+[,.][\d]{1,4})\s*</td>'
-        matches = re.findall(pattern, resp.text)
+        # Extract all dates (DD.MM.YYYY) from the page
+        dates = re.findall(r'(\d{2}\.\d{2}\.\d{4})', html)
 
-        valid = [(d, r) for d, r in matches if len(r) < 10 and r.count('.') <= 1]
+        # Find the RUONIA rate row: look for "Ставка RUONIA" then capture numbers
+        # The rate row has format: <td>Ставка RUONIA...</td><td>14,85</td><td>14,81</td>
+        rate_match = re.search(
+            r'Ставка\s+RUONIA[^<]*</td>\s*'
+            r'(?:<td[^>]*>\s*(-?[\d]+[,.][\d]{1,4})\s*</td>\s*)*',
+            html, re.DOTALL
+        )
 
-        if valid:
-            date_str, rate_str = valid[-1]
-            rate = float(rate_str.replace(",", "."))
-            log.info(f"RUONIA = {rate}% (from {date_str})")
-            return [{
-                "date": TODAY,
-                "ticker": "RUONIA",
-                "source": "CBR",
-                "close_price": rate,
-                "revision_num": 1,
-                "extra_json": json.dumps({"value_date": date_str}),
-            }]
+        # Alternative: extract all numbers from the row containing "Ставка RUONIA"
+        # Find the <tr> that contains "Ставка RUONIA" and get all <td> values
+        tr_match = re.search(
+            r'<tr[^>]*>\s*<td[^>]*>[^<]*Ставка\s+RUONIA[^<]*</td>(.*?)</tr>',
+            html, re.DOTALL | re.IGNORECASE
+        )
+
+        if tr_match:
+            rate_cells = re.findall(r'<td[^>]*>\s*(-?[\d]+[,.][\d]{1,4})\s*</td>', tr_match.group(1))
+            if rate_cells and dates:
+                # Take the last rate (most recent date)
+                rate_str = rate_cells[-1]
+                date_str = dates[-1] if len(dates) >= len(rate_cells) else dates[0]
+                rate = float(rate_str.replace(",", "."))
+                log.info(f"RUONIA = {rate}% (from {date_str})")
+                return [{
+                    "date": TODAY,
+                    "ticker": "RUONIA",
+                    "source": "CBR",
+                    "close_price": rate,
+                    "revision_num": 1,
+                    "extra_json": json.dumps({"value_date": date_str}),
+                }]
 
         log.warning("RUONIA not found in HTML")
         return []
@@ -142,7 +168,12 @@ def fetch_ruonia() -> list[dict]:
 
 # ── 4. CPI YoY ────────────────────────────────────────────────────
 def fetch_cpi() -> list[dict]:
-    """Fetch CPI YoY from CBR inflation page."""
+    """Fetch CPI YoY from CBR inflation page.
+    CBR inflation table has 4 columns:
+      Дата (MM.YYYY) | Ключевая ставка, % | Инфляция, % г/г | Цель, %
+    Example row: 02.2026 | 15,50 | 5,91 | 4,00
+    We need the 3rd column (Инфляция, % г/г) from the first data row.
+    """
     url = "https://www.cbr.ru/hd_base/infl/"
     try:
         resp = requests.get(url, timeout=15,
@@ -150,35 +181,38 @@ def fetch_cpi() -> list[dict]:
         resp.raise_for_status()
         html = resp.text
 
-        patterns = [
-            r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>[^<]*</td>\s*<td[^>]*>\s*([\d,\.]+)',
-            r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*([\d,\.]+)',
-            r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*[\d,\.]+\s*</td>\s*<td[^>]*>\s*([\d,\.]+)',
-        ]
+        # Date format is MM.YYYY (not DD.MM.YYYY!)
+        # Pattern: <td>MM.YYYY</td><td>key_rate</td><td>CPI</td><td>target</td>
+        pattern = (
+            r'<td[^>]*>\s*(\d{2}\.\d{4})\s*</td>\s*'   # date MM.YYYY
+            r'<td[^>]*>\s*[\d,\.]+\s*</td>\s*'           # key rate (skip)
+            r'<td[^>]*>\s*([\d,\.]+)\s*</td>'             # CPI YoY (capture)
+        )
+        matches = re.findall(pattern, html, re.DOTALL)
 
-        for pattern in patterns:
-            matches = re.findall(pattern, html)
-            valid = []
-            for d, v in matches:
-                try:
-                    val = float(v.replace(",", "."))
-                    if 0 < val < 30:
-                        valid.append((d, v))
-                except ValueError:
-                    pass
+        # Filter: CPI should be a reasonable number (0-30%)
+        valid = []
+        for d, v in matches:
+            try:
+                val = float(v.replace(",", "."))
+                if 0 < val < 30:
+                    valid.append((d, v))
+            except ValueError:
+                pass
 
-            if valid:
-                date_str, cpi_str = valid[-1]
-                cpi = float(cpi_str.replace(",", "."))
-                log.info(f"CPI_YOY = {cpi}% (from {date_str})")
-                return [{
-                    "date": TODAY,
-                    "ticker": "CPI_YOY",
-                    "source": "CBR",
-                    "close_price": cpi,
-                    "revision_num": 1,
-                    "extra_json": json.dumps({"report_date": date_str}),
-                }]
+        if valid:
+            # First match is the most recent (table is sorted desc)
+            date_str, cpi_str = valid[0]
+            cpi = float(cpi_str.replace(",", "."))
+            log.info(f"CPI_YOY = {cpi}% (from {date_str})")
+            return [{
+                "date": TODAY,
+                "ticker": "CPI_YOY",
+                "source": "CBR",
+                "close_price": cpi,
+                "revision_num": 1,
+                "extra_json": json.dumps({"report_date": date_str}),
+            }]
 
         log.warning("CPI not found in HTML")
         return []
@@ -197,14 +231,17 @@ def main():
     try:
         all_rows = []
 
+        # Fetch all CBR indicators
         all_rows.extend(fetch_usd_rub())
         all_rows.extend(fetch_key_rate())
         all_rows.extend(fetch_ruonia())
         all_rows.extend(fetch_cpi())
 
+        # Add etl_run_id
         for row in all_rows:
             row["etl_run_id"] = run_id
 
+        # Upsert
         if all_rows:
             upsert_raw_market_data(all_rows)
             total_loaded = len(all_rows)
