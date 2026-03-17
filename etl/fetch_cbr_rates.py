@@ -81,13 +81,10 @@ def fetch_key_rate() -> list[dict]:
         resp.raise_for_status()
         html = resp.text
 
-        # Parse HTML table: Date | Rate
-        # Find last row with rate value
         pattern = r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*([\d,\.]+)'
         matches = re.findall(pattern, html)
 
         if matches:
-            # Last entry is the current rate
             date_str, rate_str = matches[-1]
             rate = float(rate_str.replace(",", "."))
             log.info(f"KEY_RATE = {rate}% (from {date_str})")
@@ -117,13 +114,9 @@ def fetch_ruonia() -> list[dict]:
                             headers={"User-Agent": "IDP-ETL/1.0"})
         resp.raise_for_status()
 
-        # RUONIA table: Date | Rate (%) | Volume
-        # Rate is a small number like 20,45 (not a date pattern dd.mm.yyyy)
-        # Use regex that captures date, then the NEXT cell's numeric value
         pattern = r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*(-?[\d]+[,.][\d]{1,4})\s*</td>'
         matches = re.findall(pattern, resp.text)
 
-        # Filter out any match where the "rate" looks like a date (dd.mm.yyyy)
         valid = [(d, r) for d, r in matches if len(r) < 10 and r.count('.') <= 1]
 
         if valid:
@@ -157,20 +150,14 @@ def fetch_cpi() -> list[dict]:
         resp.raise_for_status()
         html = resp.text
 
-        # Try multiple regex patterns for different CBR page formats
-        # Pattern 1: Date | something | CPI_YoY | target (4-column table)
         patterns = [
-            # 3+ columns: date, skip 1 col, capture 2nd number
             r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>[^<]*</td>\s*<td[^>]*>\s*([\d,\.]+)',
-            # 2 columns: date, then number
             r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*([\d,\.]+)',
-            # With possible whitespace/newlines between tags
             r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*[\d,\.]+\s*</td>\s*<td[^>]*>\s*([\d,\.]+)',
         ]
 
         for pattern in patterns:
             matches = re.findall(pattern, html)
-            # Filter: CPI should be a reasonable number (0-30%)
             valid = []
             for d, v in matches:
                 try:
@@ -210,17 +197,14 @@ def main():
     try:
         all_rows = []
 
-        # Fetch all CBR indicators
         all_rows.extend(fetch_usd_rub())
         all_rows.extend(fetch_key_rate())
         all_rows.extend(fetch_ruonia())
         all_rows.extend(fetch_cpi())
 
-        # Add etl_run_id
         for row in all_rows:
             row["etl_run_id"] = run_id
 
-        # Upsert
         if all_rows:
             upsert_raw_market_data(all_rows)
             total_loaded = len(all_rows)
