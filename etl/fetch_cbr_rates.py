@@ -60,6 +60,7 @@ def fetch_usd_rub() -> list[dict]:
                         "source": "CBR",
                         "close_price": rate,
                         "revision_num": 1,
+                        "extra_json": json.dumps({}),
                     }]
 
         log.warning("USD not found in CBR XML")
@@ -116,12 +117,17 @@ def fetch_ruonia() -> list[dict]:
                             headers={"User-Agent": "IDP-ETL/1.0"})
         resp.raise_for_status()
 
-        # Parse table rows
-        pattern = r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*([\d,\.]+)'
+        # RUONIA table: Date | Rate (%) | Volume
+        # Rate is a small number like 20,45 (not a date pattern dd.mm.yyyy)
+        # Use regex that captures date, then the NEXT cell's numeric value
+        pattern = r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*(-?[\d]+[,.][\d]{1,4})\s*</td>'
         matches = re.findall(pattern, resp.text)
 
-        if matches:
-            date_str, rate_str = matches[-1]
+        # Filter out any match where the "rate" looks like a date (dd.mm.yyyy)
+        valid = [(d, r) for d, r in matches if len(r) < 10 and r.count('.') <= 1]
+
+        if valid:
+            date_str, rate_str = valid[-1]
             rate = float(rate_str.replace(",", "."))
             log.info(f"RUONIA = {rate}% (from {date_str})")
             return [{
@@ -149,23 +155,43 @@ def fetch_cpi() -> list[dict]:
         resp = requests.get(url, timeout=15,
                             headers={"User-Agent": "IDP-ETL/1.0"})
         resp.raise_for_status()
+        html = resp.text
 
-        # Table: Date | Key Rate | CPI YoY | CPI Target
-        pattern = r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>[^<]*</td>\s*<td[^>]*>\s*([\d,\.]+)'
-        matches = re.findall(pattern, resp.text)
+        # Try multiple regex patterns for different CBR page formats
+        # Pattern 1: Date | something | CPI_YoY | target (4-column table)
+        patterns = [
+            # 3+ columns: date, skip 1 col, capture 2nd number
+            r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>[^<]*</td>\s*<td[^>]*>\s*([\d,\.]+)',
+            # 2 columns: date, then number
+            r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*([\d,\.]+)',
+            # With possible whitespace/newlines between tags
+            r'(\d{2}\.\d{2}\.\d{4})\s*</td>\s*<td[^>]*>\s*[\d,\.]+\s*</td>\s*<td[^>]*>\s*([\d,\.]+)',
+        ]
 
-        if matches:
-            date_str, cpi_str = matches[-1]
-            cpi = float(cpi_str.replace(",", "."))
-            log.info(f"CPI_YOY = {cpi}% (from {date_str})")
-            return [{
-                "date": TODAY,
-                "ticker": "CPI_YOY",
-                "source": "CBR",
-                "close_price": cpi,
-                "revision_num": 1,
-                "extra_json": json.dumps({"report_date": date_str}),
-            }]
+        for pattern in patterns:
+            matches = re.findall(pattern, html)
+            # Filter: CPI should be a reasonable number (0-30%)
+            valid = []
+            for d, v in matches:
+                try:
+                    val = float(v.replace(",", "."))
+                    if 0 < val < 30:
+                        valid.append((d, v))
+                except ValueError:
+                    pass
+
+            if valid:
+                date_str, cpi_str = valid[-1]
+                cpi = float(cpi_str.replace(",", "."))
+                log.info(f"CPI_YOY = {cpi}% (from {date_str})")
+                return [{
+                    "date": TODAY,
+                    "ticker": "CPI_YOY",
+                    "source": "CBR",
+                    "close_price": cpi,
+                    "revision_num": 1,
+                    "extra_json": json.dumps({"report_date": date_str}),
+                }]
 
         log.warning("CPI not found in HTML")
         return []
