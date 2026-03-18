@@ -43,6 +43,9 @@ jobs:
         working-directory: compute
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          token: ${{ github.token }}
 
       - uses: actions/setup-python@v5
         with:
@@ -84,8 +87,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data.json
           git diff --staged --quiet || git commit -m "auto: update data.json [skip ci]"
-          git push
-        continue-on-error: true
+          git push origin master
 
       # Quality checks + alerts
       - name: Run quality checks
