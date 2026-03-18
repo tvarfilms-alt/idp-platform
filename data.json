@@ -56,23 +56,6 @@
   },
   "l3": [
     {
-      "ticker": "SMLT",
-      "price": 830.0,
-      "pe": 9.67,
-      "pbv": 1.75,
-      "ev_ebitda": null,
-      "roe": 9.41,
-      "debt_ratio": 0.94,
-      "return_1m": null,
-      "return_3m": null,
-      "return_6m": null,
-      "momentum": 0.8163,
-      "value": 1.0,
-      "quality": 1.0,
-      "idea_score": 0.9357,
-      "signal": "BUY"
-    },
-    {
       "ticker": "YDEX",
       "price": 4514.0,
       "pe": null,
@@ -223,6 +206,23 @@
       "value": 0.5,
       "quality": 0.5,
       "idea_score": 0.6179,
+      "signal": "BUY"
+    },
+    {
+      "ticker": "SMLT",
+      "price": 830.0,
+      "pe": null,
+      "pbv": null,
+      "ev_ebitda": null,
+      "roe": null,
+      "debt_ratio": null,
+      "return_1m": null,
+      "return_3m": null,
+      "return_6m": null,
+      "momentum": 0.8163,
+      "value": 0.5,
+      "quality": 0.5,
+      "idea_score": 0.6107,
       "signal": "BUY"
     },
     {
@@ -398,11 +398,11 @@
     {
       "ticker": "PIKK",
       "price": 469.7,
-      "pe": 15.77,
-      "pbv": 0.76,
+      "pe": null,
+      "pbv": null,
       "ev_ebitda": null,
-      "roe": 4.82,
-      "debt_ratio": 0.76,
+      "roe": null,
+      "debt_ratio": null,
       "return_1m": null,
       "return_3m": null,
       "return_6m": null,
@@ -529,6 +529,23 @@
       "value": 0.5,
       "quality": 0.5,
       "idea_score": 0.4821,
+      "signal": "HOLD"
+    },
+    {
+      "ticker": "MSNG",
+      "price": 2.2085,
+      "pe": null,
+      "pbv": null,
+      "ev_ebitda": null,
+      "roe": null,
+      "debt_ratio": null,
+      "return_1m": null,
+      "return_3m": null,
+      "return_6m": null,
+      "momentum": 0.4286,
+      "value": 0.5,
+      "quality": 0.5,
+      "idea_score": 0.475,
       "signal": "HOLD"
     },
     {
@@ -733,7 +750,7 @@
       "value": 0.5,
       "quality": 0.5,
       "idea_score": 0.3893,
-      "signal": "HOLD"
+      "signal": "AVOID"
     },
     {
       "ticker": "ENPG",
@@ -887,23 +904,6 @@
       "quality": 0.5,
       "idea_score": 0.325,
       "signal": "AVOID"
-    },
-    {
-      "ticker": "MSNG",
-      "price": 2.2085,
-      "pe": 30.33,
-      "pbv": 0.28,
-      "ev_ebitda": null,
-      "roe": 0.92,
-      "debt_ratio": 0.17,
-      "return_1m": null,
-      "return_3m": null,
-      "return_6m": null,
-      "momentum": 0.4286,
-      "value": 0.0,
-      "quality": 0.0,
-      "idea_score": 0.15,
-      "signal": "AVOID"
     }
   ],
   "bonds": {
@@ -950,6 +950,18 @@
     },
     "last_etl": [
       {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-03-18T19:37:32.994187+00:00",
+        "rows": 4
+      },
+      {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-03-18T19:37:32.74784+00:00",
+        "rows": 50
+      },
+      {
         "source": "MOEX",
         "status": "PARTIAL",
         "at": "2026-03-18T16:29:25.361353+00:00",
@@ -965,18 +977,6 @@
         "source": "MOEX",
         "status": "SUCCESS",
         "at": "2026-03-18T16:29:24.089323+00:00",
-        "rows": 50
-      },
-      {
-        "source": "CBR",
-        "status": "SUCCESS",
-        "at": "2026-03-17T19:45:01.620071+00:00",
-        "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-03-17T19:45:01.609941+00:00",
         "rows": 50
       }
     ]
