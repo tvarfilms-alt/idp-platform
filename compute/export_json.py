@@ -1,12 +1,12 @@
 """
-IDP JSON Export — Generates data.json for the Dashboard
+IDP JSON Export â Generates data.json for the Dashboard
 
 Per spec section 10:
-  - l1 {} — current regime + 24 months history
-  - l2 {} — current market regime + 250 days history
-  - l3 [] — 50 stocks with factors and IdeaScore
-  - bonds {} — market data + recommendations
-  - meta {} — update date, config version, ETL status
+  - l1 {} â current regime + 24 months history
+  - l2 {} â current market regime + 250 days history
+  - l3 [] â 50 stocks with factors and IdeaScore
+  - bonds {} â market data + recommendations
+  - meta {} â update date, config version, ETL status
 
 Output: data.json next to the dashboard HTML.
 Trigger: After each compute run.
@@ -144,7 +144,7 @@ def export_bonds() -> dict:
             "ruonia": r["ruonia"],
             "cpi_yoy": r["cpi_yoy"],
             "real_yield": r["real_yield"],
-            "rgb_index": r["rgb_index"],
+            "rgbi_index": r.get("rgbi_index"),
         },
         "strategy": {
             "l1_regime": r["current_l1_regime"],
@@ -189,12 +189,19 @@ def export_all(output_path: str = None):
 
     log("Exporting data.json...")
 
+    def safe(fn, default):
+        try:
+            return fn()
+        except Exception as e:
+            log(f"  Warning: {fn.__name__} failed: {e}")
+            return default
+
     data = {
-        "l1": export_l1(),
-        "l2": export_l2(),
-        "l3": export_l3(),
-        "bonds": export_bonds(),
-        "meta": export_meta(),
+        "l1": safe(export_l1, {"current": None, "history": []}),
+        "l2": safe(export_l2, {"current": None, "history": []}),
+        "l3": safe(export_l3, []),
+        "bonds": safe(export_bonds, {}),
+        "meta": safe(export_meta, {}),
     }
 
     with open(output_path, "w", encoding="utf-8") as f:
