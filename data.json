@@ -28,18 +28,24 @@
   },
   "l2": {
     "current": {
-      "date": "2026-03-17",
-      "regime": "Neutral",
-      "multiplier": 1.0,
-      "wms": 5.0
+      "date": "2026-03-18",
+      "regime": "Risk-on",
+      "multiplier": 1.2,
+      "wms": 3.0
     },
     "scores": {
-      "volatility": 1,
+      "volatility": 0,
       "credit": 1,
       "liquidity": 0,
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-03-18",
+        "regime": "Risk-on",
+        "wms": 3.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-03-17",
         "regime": "Neutral",
@@ -50,8 +56,25 @@
   },
   "l3": [
     {
+      "ticker": "SMLT",
+      "price": 830.0,
+      "pe": 9.67,
+      "pbv": 1.75,
+      "ev_ebitda": null,
+      "roe": 9.41,
+      "debt_ratio": 0.94,
+      "return_1m": null,
+      "return_3m": null,
+      "return_6m": null,
+      "momentum": 0.8163,
+      "value": 1.0,
+      "quality": 1.0,
+      "idea_score": 0.9357,
+      "signal": "BUY"
+    },
+    {
       "ticker": "YDEX",
-      "price": 4487.0,
+      "price": 4514.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -68,7 +91,7 @@
     },
     {
       "ticker": "VTBR",
-      "price": 86.45,
+      "price": 86.445,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -85,7 +108,7 @@
     },
     {
       "ticker": "VKCO",
-      "price": 308.85,
+      "price": 310.3,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -102,7 +125,7 @@
     },
     {
       "ticker": "UPRO",
-      "price": 1.5285,
+      "price": 1.51,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -119,7 +142,7 @@
     },
     {
       "ticker": "TRNFP",
-      "price": 1397.6,
+      "price": 1399.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -136,7 +159,7 @@
     },
     {
       "ticker": "TATNP",
-      "price": 589.1,
+      "price": 587.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -153,7 +176,7 @@
     },
     {
       "ticker": "TATN",
-      "price": 629.0,
+      "price": 630.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -170,7 +193,7 @@
     },
     {
       "ticker": "SNGSP",
-      "price": 47.47,
+      "price": 48.595,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -187,7 +210,7 @@
     },
     {
       "ticker": "SNGS",
-      "price": 22.43,
+      "price": 22.55,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -203,25 +226,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "SMLT",
-      "price": 828.6,
-      "pe": null,
-      "pbv": null,
-      "ev_ebitda": null,
-      "roe": null,
-      "debt_ratio": null,
-      "return_1m": null,
-      "return_3m": null,
-      "return_6m": null,
-      "momentum": 0.8163,
-      "value": 0.5,
-      "quality": 0.5,
-      "idea_score": 0.6107,
-      "signal": "BUY"
-    },
-    {
       "ticker": "SIBN",
-      "price": 543.5,
+      "price": 545.4,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -238,7 +244,7 @@
     },
     {
       "ticker": "SGZH",
-      "price": 1.251,
+      "price": 1.228,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -255,7 +261,7 @@
     },
     {
       "ticker": "SELG",
-      "price": 57.31,
+      "price": 56.43,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -272,7 +278,7 @@
     },
     {
       "ticker": "SBERP",
-      "price": 316.14,
+      "price": 319.4,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -289,7 +295,7 @@
     },
     {
       "ticker": "SBER",
-      "price": 316.4,
+      "price": 319.69,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -306,7 +312,7 @@
     },
     {
       "ticker": "RUAL",
-      "price": 44.085,
+      "price": 44.11,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -323,7 +329,7 @@
     },
     {
       "ticker": "RTKM",
-      "price": 60.11,
+      "price": 60.03,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -340,7 +346,7 @@
     },
     {
       "ticker": "ROSN",
-      "price": 494.05,
+      "price": 496.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -357,7 +363,7 @@
     },
     {
       "ticker": "POSI",
-      "price": 1177.0,
+      "price": 1164.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -374,7 +380,7 @@
     },
     {
       "ticker": "PLZL",
-      "price": 2392.6,
+      "price": 2386.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -392,11 +398,11 @@
     {
       "ticker": "PIKK",
       "price": 469.7,
-      "pe": null,
-      "pbv": null,
+      "pe": 15.77,
+      "pbv": 0.76,
       "ev_ebitda": null,
-      "roe": null,
-      "debt_ratio": null,
+      "roe": 4.82,
+      "debt_ratio": 0.76,
       "return_1m": null,
       "return_3m": null,
       "return_6m": null,
@@ -408,7 +414,7 @@
     },
     {
       "ticker": "PHOR",
-      "price": 7405.0,
+      "price": 7563.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -425,7 +431,7 @@
     },
     {
       "ticker": "OZON",
-      "price": 4548.0,
+      "price": 4547.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -442,7 +448,7 @@
     },
     {
       "ticker": "NVTK",
-      "price": 1353.7,
+      "price": 1356.1,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -459,7 +465,7 @@
     },
     {
       "ticker": "NLMK",
-      "price": 105.02,
+      "price": 104.08,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -476,7 +482,7 @@
     },
     {
       "ticker": "MTSS",
-      "price": 226.55,
+      "price": 229.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -493,7 +499,7 @@
     },
     {
       "ticker": "MTLRP",
-      "price": 68.75,
+      "price": 68.4,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -510,7 +516,7 @@
     },
     {
       "ticker": "MTLR",
-      "price": 74.28,
+      "price": 73.26,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -526,25 +532,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "MSNG",
-      "price": 2.23,
-      "pe": null,
-      "pbv": null,
-      "ev_ebitda": null,
-      "roe": null,
-      "debt_ratio": null,
-      "return_1m": null,
-      "return_3m": null,
-      "return_6m": null,
-      "momentum": 0.4286,
-      "value": 0.5,
-      "quality": 0.5,
-      "idea_score": 0.475,
-      "signal": "HOLD"
-    },
-    {
       "ticker": "MOEX",
-      "price": 174.52,
+      "price": 175.4,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -561,7 +550,7 @@
     },
     {
       "ticker": "MGNT",
-      "price": 3219.5,
+      "price": 3245.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -578,7 +567,7 @@
     },
     {
       "ticker": "MAGN",
-      "price": 29.67,
+      "price": 29.145,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -595,7 +584,7 @@
     },
     {
       "ticker": "LKOH",
-      "price": 5700.0,
+      "price": 5738.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -612,7 +601,7 @@
     },
     {
       "ticker": "LEAS",
-      "price": 668.0,
+      "price": 667.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -629,7 +618,7 @@
     },
     {
       "ticker": "IRAO",
-      "price": 3.1745,
+      "price": 3.1815,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -646,7 +635,7 @@
     },
     {
       "ticker": "HYDR",
-      "price": 0.4429,
+      "price": 0.4466,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -680,7 +669,7 @@
     },
     {
       "ticker": "GMKN",
-      "price": 154.16,
+      "price": 153.98,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -697,7 +686,7 @@
     },
     {
       "ticker": "GAZP",
-      "price": 128.28,
+      "price": 127.64,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -714,7 +703,7 @@
     },
     {
       "ticker": "FLOT",
-      "price": 89.24,
+      "price": 89.62,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -731,7 +720,7 @@
     },
     {
       "ticker": "FEES",
-      "price": 0.07328,
+      "price": 0.07238,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -744,11 +733,11 @@
       "value": 0.5,
       "quality": 0.5,
       "idea_score": 0.3893,
-      "signal": "AVOID"
+      "signal": "HOLD"
     },
     {
       "ticker": "ENPG",
-      "price": 507.05,
+      "price": 506.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -765,7 +754,7 @@
     },
     {
       "ticker": "CHMF",
-      "price": 924.4,
+      "price": 919.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -782,7 +771,7 @@
     },
     {
       "ticker": "CBOM",
-      "price": 5.716,
+      "price": 5.734,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -799,7 +788,7 @@
     },
     {
       "ticker": "BSPB",
-      "price": 334.85,
+      "price": 331.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -816,7 +805,7 @@
     },
     {
       "ticker": "BANEP",
-      "price": 990.0,
+      "price": 991.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -833,7 +822,7 @@
     },
     {
       "ticker": "BANE",
-      "price": 1698.0,
+      "price": 1674.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -850,7 +839,7 @@
     },
     {
       "ticker": "ALRS",
-      "price": 38.12,
+      "price": 37.9,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -867,7 +856,7 @@
     },
     {
       "ticker": "AFLT",
-      "price": 50.76,
+      "price": 50.59,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -884,7 +873,7 @@
     },
     {
       "ticker": "AFKS",
-      "price": 13.578,
+      "price": 13.52,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -898,6 +887,23 @@
       "quality": 0.5,
       "idea_score": 0.325,
       "signal": "AVOID"
+    },
+    {
+      "ticker": "MSNG",
+      "price": 2.2085,
+      "pe": 30.33,
+      "pbv": 0.28,
+      "ev_ebitda": null,
+      "roe": 0.92,
+      "debt_ratio": 0.17,
+      "return_1m": null,
+      "return_3m": null,
+      "return_6m": null,
+      "momentum": 0.4286,
+      "value": 0.0,
+      "quality": 0.0,
+      "idea_score": 0.15,
+      "signal": "AVOID"
     }
   ],
   "bonds": {
@@ -907,7 +913,7 @@
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 15.5,
-      "ruonia": 14.81,
+      "ruonia": 14.76,
       "cpi_yoy": 5.91,
       "real_yield": null,
       "rgbi_index": 119.79
@@ -944,6 +950,24 @@
     },
     "last_etl": [
       {
+        "source": "MOEX",
+        "status": "PARTIAL",
+        "at": "2026-03-18T16:29:25.361353+00:00",
+        "rows": 3
+      },
+      {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-03-18T16:29:24.14589+00:00",
+        "rows": 4
+      },
+      {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-03-18T16:29:24.089323+00:00",
+        "rows": 50
+      },
+      {
         "source": "CBR",
         "status": "SUCCESS",
         "at": "2026-03-17T19:45:01.620071+00:00",
@@ -954,24 +978,6 @@
         "status": "SUCCESS",
         "at": "2026-03-17T19:45:01.609941+00:00",
         "rows": 50
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-03-17T13:34:13.744341+00:00",
-        "rows": 50
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-03-17T13:22:04.241213+00:00",
-        "rows": 50
-      },
-      {
-        "source": "CBR",
-        "status": "SUCCESS",
-        "at": "2026-03-17T13:08:16.771069+00:00",
-        "rows": 4
       }
     ]
   }
