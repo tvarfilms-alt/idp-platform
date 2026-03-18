@@ -1,0 +1,38 @@
+# IDP Cron Schedule (times in UTC, MSK = UTC+3)
+# Logs go to /app/logs/
+
+# ENV variables for cron (loaded from Docker env)
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# ── ETL ──
+# MOEX daily: Mon-Fri 16:30 UTC (19:30 MSK) after market close
+30 16 * * 1-5 cd /app/etl && python fetch_moex_daily.py >> /app/logs/etl_moex.log 2>&1
+
+# CBR rates: Mon-Fri 17:00 UTC (20:00 MSK)
+0 17 * * 1-5 cd /app/etl && python fetch_cbr_rates.py >> /app/logs/etl_cbr.log 2>&1
+
+# FM fundamentals: Monday 05:30 UTC (08:30 MSK)
+30 5 * * 1 cd /app/etl && python fetch_fm_fundamentals.py >> /app/logs/etl_fm.log 2>&1
+
+# ── Compute ──
+# L2 + Bonds: Mon-Fri 18:00 UTC (21:00 MSK)
+0 18 * * 1-5 cd /app/compute && python run_compute.py l2 >> /app/logs/compute_l2.log 2>&1 && python run_compute.py bonds >> /app/logs/compute_bonds.log 2>&1
+
+# L1: 1st of month 07:00 UTC (10:00 MSK)
+0 7 1 * * cd /app/compute && python run_compute.py l1 >> /app/logs/compute_l1.log 2>&1
+
+# L3: Monday 05:00 UTC (08:00 MSK)
+0 5 * * 1 cd /app/compute && python run_compute.py l3 >> /app/logs/compute_l3.log 2>&1
+
+# ── Export ──
+# data.json: after compute, Mon-Fri 18:15 UTC (21:15 MSK)
+15 18 * * 1-5 cd /app/compute && python export_json.py /app/data.json >> /app/logs/export.log 2>&1
+
+# ── Quality Check ──
+# Daily at 18:30 UTC (21:30 MSK)
+30 18 * * 1-5 cd /app/compute && python quality_check.py >> /app/logs/quality.log 2>&1
+
+# ── Log rotation ──
+# Weekly cleanup of logs older than 7 days
+0 3 * * 0 find /app/logs -name "*.log" -mtime +7 -delete 2>/dev/null

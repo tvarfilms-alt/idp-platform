@@ -20,11 +20,29 @@ pgdata/
 
 # Large/binary files
 *.xlsm
+*.xlsx
 *.zip
 *.otf
 brand/
 brand 2/
 ~$*
+.~lock.*
+
+# Documents (keep in Google Drive / local, not git)
+*.docx
+*.pdf
+
+# Old/temp scripts
+download_*.py
+download_*.sh
+
+# Dashboard data (auto-generated)
+data.json
+data_prev.json
+
+# Logs & backups
+logs/
+backups/
 
 # OS
 .DS_Store

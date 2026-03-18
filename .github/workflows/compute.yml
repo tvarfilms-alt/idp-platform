@@ -1,0 +1,99 @@
+name: IDP Compute
+
+on:
+  schedule:
+    # L2 + Bonds: weekdays at 18:00 UTC (21:00 MSK) — after ETL
+    - cron: '0 18 * * 1-5'
+    # L1: 1st of each month at 07:00 UTC (10:00 MSK)
+    - cron: '0 7 1 * *'
+    # L3: Monday at 05:00 UTC (08:00 MSK)
+    - cron: '0 5 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      level:
+        description: 'Which compute level to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - l1
+          - l2
+          - l3
+          - bonds
+      target_date:
+        description: 'Target date (YYYY-MM-DD), leave empty for today'
+        required: false
+        default: ''
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: compute
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: etl/requirements.txt
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Determine level and date
+        id: params
+        run: |
+          # Determine level from schedule or input
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            LEVEL="${{ github.event.inputs.level }}"
+            TARGET="${{ github.event.inputs.target_date }}"
+          elif [ "${{ github.event.schedule }}" = "0 7 1 * *" ]; then
+            LEVEL="l1"
+            TARGET=""
+          elif [ "${{ github.event.schedule }}" = "0 5 * * 1" ]; then
+            LEVEL="l3"
+            TARGET=""
+          else
+            # Default: L2 + Bonds daily
+            LEVEL="l2"
+            TARGET=""
+          fi
+          echo "level=$LEVEL" >> $GITHUB_OUTPUT
+          echo "target=$TARGET" >> $GITHUB_OUTPUT
+          echo "Running compute: level=$LEVEL target=$TARGET"
+
+      - name: Run compute
+        run: |
+          LEVEL="${{ steps.params.outputs.level }}"
+          TARGET="${{ steps.params.outputs.target }}"
+          if [ -n "$TARGET" ]; then
+            python run_compute.py "$LEVEL" "$TARGET"
+          else
+            python run_compute.py "$LEVEL"
+          fi
+
+      # Also run bonds after L2 on daily schedule
+      - name: Run bonds (after L2)
+        if: steps.params.outputs.level == 'l2'
+        run: python run_compute.py bonds
+
+      # Export data.json after any compute
+      - name: Export data.json
+        run: python export_json.py ../data.json
+
+      # Quality checks + alerts
+      - name: Run quality checks
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python quality_check.py
+        continue-on-error: true

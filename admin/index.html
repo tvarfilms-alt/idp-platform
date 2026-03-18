@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDP Admin — Manual Data Entry</title>
+<style>
+  :root {
+    --primary: #e8630a;
+    --primary-dark: #c45308;
+    --bg: #f5f5f5;
+    --card: #fff;
+    --text: #333;
+    --text-light: #666;
+    --border: #ddd;
+    --success: #28a745;
+    --error: #dc3545;
+    --warn: #ffc107;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  .header { background: #1a1a2e; color: #fff; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .header .badge { background: var(--primary); padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab { padding: 10px 20px; border: none; background: var(--card); border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-light); border-bottom: 3px solid transparent; }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+  .card { background: var(--card); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card h2 { font-size: 18px; margin-bottom: 16px; color: var(--text); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 13px; font-weight: 600; color: var(--text-light); }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+  .form-group .hint { font-size: 11px; color: var(--text-light); }
+  .form-group.full { grid-column: 1 / -1; }
+  .btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary { background: #eee; color: var(--text); }
+  .btn-secondary:hover { background: #ddd; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .actions { display: flex; gap: 12px; margin-top: 20px; }
+  .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 8px; color: #fff; font-size: 14px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.3s; }
+  .toast.show { opacity: 1; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--error); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; background: #f8f8f8; font-weight: 600; color: var(--text-light); border-bottom: 2px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+  tr:hover { background: #fafafa; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .status-dot.ok { background: var(--success); }
+  .status-dot.deleted { background: var(--error); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .config-bar { background: var(--card); border-radius: 12px; padding: 16px 24px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .config-bar .form-group { flex: 1; }
+  .config-bar .form-group input { width: 100%; }
+  .connected { color: var(--success); font-size: 13px; font-weight: 500; }
+  .disconnected { color: var(--error); font-size: 13px; font-weight: 500; }
+  .csv-drop { border: 2px dashed var(--border); border-radius: 12px; padding: 40px; text-align: center; color: var(--text-light); cursor: pointer; transition: border-color 0.3s; }
+  .csv-drop:hover, .csv-drop.dragover { border-color: var(--primary); color: var(--primary); }
+  .csv-preview { max-height: 300px; overflow: auto; margin-top: 16px; }
+  .validation-error { color: var(--error); font-size: 12px; font-weight: 500; }
+  .quick-btns { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .quick-btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+  .quick-btn:hover, .quick-btn.active { border-color: var(--primary); background: #fff3e6; color: var(--primary); }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>IDP Admin Panel</h1>
+  <span class="badge">Manual Data Entry</span>
+  <span id="connStatus" class="disconnected" style="margin-left: auto;">Not connected</span>
+</div>
+
+<div class="container">
+  <!-- Connection Config -->
+  <div class="config-bar" id="configBar">
+    <div class="form-group" style="flex:2">
+      <label>Supabase URL</label>
+      <input type="text" id="cfgUrl" placeholder="https://xxxxx.supabase.co">
+    </div>
+    <div class="form-group" style="flex:3">
+      <label>Service Role Key</label>
+      <input type="password" id="cfgKey" placeholder="eyJhbGciOiJI...">
+    </div>
+    <div class="form-group" style="flex:0">
+      <label>&nbsp;</label>
+      <button class="btn btn-primary" onclick="connect()">Connect</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('entry')">Manual Entry</button>
+    <button class="tab" onclick="switchTab('csv')">CSV Upload</button>
+    <button class="tab" onclick="switchTab('history')">History</button>
+    <button class="tab" onclick="switchTab('status')">ETL Status</button>
+  </div>
+
+  <!-- Panel: Manual Entry -->
+  <div class="panel active" id="panel-entry">
+    <div class="card">
+      <h2>Quick Entry</h2>
+      <p style="font-size:13px; color:var(--text-light); margin-bottom:16px;">Select indicator to enter a new value. Data flows: manual_inputs → raw_market_data (via DB trigger).</p>
+      <div class="quick-btns" id="quickBtns">
+        <button class="quick-btn" onclick="selectTicker('PMI_RU')">PMI Russia</button>
+        <button class="quick-btn" onclick="selectTicker('BCOM')">BCOM Index</button>
+        <button class="quick-btn" onclick="selectTicker('URALS')">Urals Oil</button>
+        <button class="quick-btn" onclick="selectTicker('CPI_MOM')">CPI MoM (override)</button>
+        <button class="quick-btn" onclick="selectTicker('CPI_YOY')">CPI YoY (override)</button>
+        <button class="quick-btn" onclick="selectTicker('KEY_RATE')">Key Rate (override)</button>
+        <button class="quick-btn" onclick="selectTicker('RUONIA')">RUONIA (override)</button>
+        <button class="quick-btn" onclick="selectTicker('USD_RUB')">USD/RUB (override)</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Ticker / Indicator</label>
+          <select id="fldTicker" onchange="onTickerChange()">
+            <option value="">-- select --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date (YYYY-MM-DD)</label>
+          <input type="date" id="fldDate">
+        </div>
+        <div class="form-group">
+          <label>Value</label>
+          <input type="number" step="any" id="fldValue" placeholder="e.g. 52.3">
+          <span class="hint" id="fldRange"></span>
+          <span class="validation-error" id="fldError"></span>
+        </div>
+        <div class="form-group">
+          <label>Entered By</label>
+          <input type="text" id="fldUser" placeholder="Your name">
+        </div>
+        <div class="form-group full">
+          <label>Comment (source, reason)</label>
+          <textarea id="fldComment" rows="2" placeholder="e.g. S&P Global PMI March 2026, Investing.com"></textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="submitEntry()">Save Entry</button>
+        <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: CSV Upload -->
+  <div class="panel" id="panel-csv">
+    <div class="card">
+      <h2>CSV Bulk Upload</h2>
+      <p style="font-size:13px; color:var(--text-light); margin-bottom:16px;">
+        Format: <code>date,ticker,value,comment</code> (header required). One row per data point.
+      </p>
+      <div class="csv-drop" id="csvDrop" onclick="document.getElementById('csvFile').click()">
+        <input type="file" id="csvFile" accept=".csv,.tsv" style="display:none" onchange="handleCSV(event)">
+        <p style="font-size: 16px; margin-bottom: 8px;">Drop CSV file here or click to browse</p>
+        <p style="font-size: 12px;">Supports .csv and .tsv files</p>
+      </div>
+      <div class="csv-preview" id="csvPreview"></div>
+      <div class="actions" id="csvActions" style="display:none">
+        <button class="btn btn-primary" onclick="submitCSV()">Upload All Rows</button>
+        <button class="btn btn-secondary" onclick="clearCSV()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: History -->
+  <div class="panel" id="panel-history">
+    <div class="card">
+      <h2>Manual Inputs History</h2>
+      <div style="display:flex; gap:12px; margin-bottom:16px; align-items:flex-end;">
+        <div class="form-group">
+          <label>Filter by Ticker</label>
+          <select id="histTicker" onchange="loadHistory()">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Limit</label>
+          <select id="histLimit" onchange="loadHistory()">
+            <option value="50">Last 50</option>
+            <option value="100">Last 100</option>
+            <option value="200">Last 200</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="loadHistory()">Refresh</button>
+      </div>
+      <div id="historyTable">
+        <p style="color:var(--text-light); font-size:14px;">Connect to Supabase to view history.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: ETL Status -->
+  <div class="panel" id="panel-status">
+    <div class="card">
+      <h2>Recent ETL Runs</h2>
+      <div id="etlTable">
+        <p style="color:var(--text-light); font-size:14px;">Connect to Supabase to view ETL status.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Data Freshness</h2>
+      <div id="freshnessTable">
+        <p style="color:var(--text-light); font-size:14px;">Connect to see data freshness per indicator.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──
+let supabaseUrl = '';
+let supabaseKey = '';
+let instruments = [];
+let csvRows = [];
+
+// ── Connection ──
+function connect() {
+  supabaseUrl = document.getElementById('cfgUrl').value.trim().replace(/\/+$/, '');
+  supabaseKey = document.getElementById('cfgKey').value.trim();
+  if (!supabaseUrl || !supabaseKey) { toast('Enter URL and Key', 'error'); return; }
+  // Test connection by fetching instruments
+  apiFetch('/rest/v1/instrument_dict?select=ticker,name_ru,asset_class,source_default,level,valid_min,valid_max,is_active&is_active=eq.true&order=level,ticker')
+    .then(data => {
+      instruments = data;
+      document.getElementById('connStatus').className = 'connected';
+      document.getElementById('connStatus').textContent = `Connected (${data.length} instruments)`;
+      populateSelects();
+      loadHistory();
+      loadETLStatus();
+      toast('Connected to Supabase', 'success');
+    })
+    .catch(err => {
+      document.getElementById('connStatus').className = 'disconnected';
+      document.getElementById('connStatus').textContent = 'Connection failed';
+      toast('Connection failed: ' + err.message, 'error');
+    });
+}
+
+function apiFetch(path, options = {}) {
+  const url = supabaseUrl + path;
+  const headers = {
+    'apikey': supabaseKey,
+    'Authorization': `Bearer ${supabaseKey}`,
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+  return fetch(url, { ...options, headers }).then(async r => {
+    if (!r.ok) {
+      const text = await r.text();
+      throw new Error(`${r.status}: ${text}`);
+    }
+    const ct = r.headers.get('content-type') || '';
+    return ct.includes('json') ? r.json() : r.text();
+  });
+}
+
+// ── Selects ──
+function populateSelects() {
+  const manualTickers = instruments.filter(i => ['MANUAL','CBR'].includes(i.source_default) || i.asset_class === 'COMMODITY');
+  const sel = document.getElementById('fldTicker');
+  sel.innerHTML = '<option value="">-- select --</option>';
+  manualTickers.forEach(i => {
+    const opt = document.createElement('option');
+    opt.value = i.ticker;
+    opt.textContent = `${i.ticker} — ${i.name_ru} (${i.level})`;
+    opt.dataset.min = i.valid_min || '';
+    opt.dataset.max = i.valid_max || '';
+    sel.appendChild(opt);
+  });
+  // Also all tickers for overrides
+  const grp = document.createElement('optgroup');
+  grp.label = 'All tickers (overrides)';
+  instruments.filter(i => !manualTickers.includes(i)).forEach(i => {
+    const opt = document.createElement('option');
+    opt.value = i.ticker;
+    opt.textContent = `${i.ticker} — ${i.name_ru}`;
+    opt.dataset.min = i.valid_min || '';
+    opt.dataset.max = i.valid_max || '';
+    grp.appendChild(opt);
+  });
+  sel.appendChild(grp);
+
+  // History filter
+  const histSel = document.getElementById('histTicker');
+  histSel.innerHTML = '<option value="">All</option>';
+  instruments.forEach(i => {
+    const opt = document.createElement('option');
+    opt.value = i.ticker;
+    opt.textContent = i.ticker;
+    histSel.appendChild(opt);
+  });
+}
+
+// ── Quick buttons ──
+function selectTicker(ticker) {
+  document.getElementById('fldTicker').value = ticker;
+  onTickerChange();
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.toggle('active', b.textContent.includes(ticker) || b.onclick.toString().includes(`'${ticker}'`)));
+}
+
+function onTickerChange() {
+  const sel = document.getElementById('fldTicker');
+  const opt = sel.options[sel.selectedIndex];
+  const min = opt?.dataset?.min;
+  const max = opt?.dataset?.max;
+  const hint = document.getElementById('fldRange');
+  if (min && max) {
+    hint.textContent = `Valid range: ${min} — ${max}`;
+  } else {
+    hint.textContent = '';
+  }
+  document.getElementById('fldError').textContent = '';
+}
+
+// ── Validation ──
+function validateEntry(ticker, value) {
+  const inst = instruments.find(i => i.ticker === ticker);
+  if (!inst) return 'Unknown ticker';
+  if (inst.valid_min !== null && value < Number(inst.valid_min)) return `Value ${value} below minimum ${inst.valid_min}`;
+  if (inst.valid_max !== null && value > Number(inst.valid_max)) return `Value ${value} above maximum ${inst.valid_max}`;
+  return null;
+}
+
+// ── Submit single entry ──
+async function submitEntry() {
+  const ticker = document.getElementById('fldTicker').value;
+  const date = document.getElementById('fldDate').value;
+  const value = document.getElementById('fldValue').value;
+  const user = document.getElementById('fldUser').value.trim();
+  const comment = document.getElementById('fldComment').value.trim();
+
+  if (!ticker || !date || !value || !user) { toast('Fill all required fields', 'error'); return; }
+
+  const numValue = parseFloat(value);
+  const err = validateEntry(ticker, numValue);
+  if (err) {
+    document.getElementById('fldError').textContent = err;
+    if (!confirm(`Warning: ${err}\n\nSubmit anyway?`)) return;
+  }
+
+  try {
+    await apiFetch('/rest/v1/manual_inputs', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=representation' },
+      body: JSON.stringify({ date, ticker, value: numValue, entered_by: user, comment: comment || null })
+    });
+    toast(`Saved: ${ticker} = ${numValue} for ${date}`, 'success');
+    clearForm();
+    loadHistory();
+  } catch(e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+function clearForm() {
+  document.getElementById('fldTicker').value = '';
+  document.getElementById('fldValue').value = '';
+  document.getElementById('fldComment').value = '';
+  document.getElementById('fldRange').textContent = '';
+  document.getElementById('fldError').textContent = '';
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ── CSV Upload ──
+function handleCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    const sep = file.name.endsWith('.tsv') ? '\t' : ',';
+    const lines = text.trim().split('\n');
+    const header = lines[0].toLowerCase().split(sep).map(s => s.trim());
+
+    // Validate header
+    const required = ['date', 'ticker', 'value'];
+    const missing = required.filter(h => !header.includes(h));
+    if (missing.length) { toast(`Missing columns: ${missing.join(', ')}`, 'error'); return; }
+
+    csvRows = [];
+    const errors = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(sep).map(s => s.trim());
+      const row = {};
+      header.forEach((h, idx) => row[h] = cols[idx] || '');
+
+      if (!row.date || !row.ticker || !row.value) { errors.push(`Row ${i+1}: missing data`); continue; }
+      const numVal = parseFloat(row.value);
+      if (isNaN(numVal)) { errors.push(`Row ${i+1}: invalid value "${row.value}"`); continue; }
+
+      const valErr = validateEntry(row.ticker, numVal);
+      csvRows.push({
+        date: row.date,
+        ticker: row.ticker,
+        value: numVal,
+        comment: row.comment || `CSV upload`,
+        valid: !valErr,
+        warning: valErr
+      });
+    }
+
+    // Show preview
+    let html = '';
+    if (errors.length) html += `<p class="validation-error">${errors.join('<br>')}</p>`;
+    html += `<table><thead><tr><th>Status</th><th>Date</th><th>Ticker</th><th>Value</th><th>Comment</th></tr></thead><tbody>`;
+    csvRows.forEach(r => {
+      const icon = r.valid ? '<span class="status-dot ok"></span>OK' : `<span class="status-dot deleted"></span>${r.warning}`;
+      html += `<tr><td>${icon}</td><td>${r.date}</td><td>${r.ticker}</td><td>${r.value}</td><td>${r.comment}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<p style="margin-top:12px; font-size:13px; color:var(--text-light);">${csvRows.length} rows parsed, ${csvRows.filter(r=>r.valid).length} valid</p>`;
+
+    document.getElementById('csvPreview').innerHTML = html;
+    document.getElementById('csvActions').style.display = 'flex';
+  };
+  reader.readAsText(file);
+}
+
+async function submitCSV() {
+  const user = document.getElementById('fldUser').value.trim() || prompt('Enter your name for audit trail:');
+  if (!user) return;
+
+  let ok = 0, fail = 0;
+  for (const row of csvRows) {
+    try {
+      await apiFetch('/rest/v1/manual_inputs', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ date: row.date, ticker: row.ticker, value: row.value, entered_by: user, comment: row.comment })
+      });
+      ok++;
+    } catch(e) {
+      fail++;
+      console.error(`Failed: ${row.ticker} ${row.date}`, e);
+    }
+  }
+  toast(`CSV upload: ${ok} saved, ${fail} failed`, ok > 0 ? 'success' : 'error');
+  clearCSV();
+  loadHistory();
+}
+
+function clearCSV() {
+  csvRows = [];
+  document.getElementById('csvPreview').innerHTML = '';
+  document.getElementById('csvActions').style.display = 'none';
+  document.getElementById('csvFile').value = '';
+}
+
+// Drag & drop
+const drop = document.getElementById('csvDrop');
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+drop.addEventListener('drop', e => {
+  e.preventDefault(); drop.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) { document.getElementById('csvFile').files = e.dataTransfer.files; handleCSV({target:{files:[file]}}); }
+});
+
+// ── History ──
+async function loadHistory() {
+  const ticker = document.getElementById('histTicker').value;
+  const limit = document.getElementById('histLimit').value;
+  let path = `/rest/v1/manual_inputs?select=*&order=entered_at.desc&limit=${limit}`;
+  if (ticker) path += `&ticker=eq.${ticker}`;
+
+  try {
+    const data = await apiFetch(path);
+    if (!data.length) {
+      document.getElementById('historyTable').innerHTML = '<p style="color:var(--text-light)">No entries found.</p>';
+      return;
+    }
+    let html = `<table><thead><tr><th>ID</th><th>Date</th><th>Ticker</th><th>Value</th><th>By</th><th>At</th><th>Comment</th><th>Status</th></tr></thead><tbody>`;
+    data.forEach(r => {
+      const status = r.is_deleted ? '<span class="status-dot deleted"></span>Deleted' : '<span class="status-dot ok"></span>Active';
+      const at = new Date(r.entered_at).toLocaleString('ru-RU');
+      html += `<tr><td>${r.id}</td><td>${r.date}</td><td><strong>${r.ticker}</strong></td><td>${r.value}</td><td>${r.entered_by}</td><td>${at}</td><td>${r.comment || ''}</td><td>${status}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('historyTable').innerHTML = html;
+  } catch(e) {
+    document.getElementById('historyTable').innerHTML = `<p class="validation-error">Error: ${e.message}</p>`;
+  }
+}
+
+// ── ETL Status ──
+async function loadETLStatus() {
+  try {
+    const runs = await apiFetch('/rest/v1/etl_runs?select=*&order=started_at.desc&limit=20');
+    let html = `<table><thead><tr><th>ID</th><th>Source</th><th>Started</th><th>Status</th><th>Rows</th><th>Skipped</th><th>Error</th></tr></thead><tbody>`;
+    runs.forEach(r => {
+      const statusColor = r.status === 'SUCCESS' ? 'ok' : r.status === 'PARTIAL' ? 'ok' : 'deleted';
+      const started = new Date(r.started_at).toLocaleString('ru-RU');
+      html += `<tr><td>${r.run_id}</td><td><strong>${r.source_id}</strong></td><td>${started}</td><td><span class="status-dot ${statusColor}"></span>${r.status}</td><td>${r.rows_loaded}</td><td>${r.rows_skipped}</td><td>${r.error_message || ''}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('etlTable').innerHTML = html;
+  } catch(e) {
+    document.getElementById('etlTable').innerHTML = `<p class="validation-error">Error: ${e.message}</p>`;
+  }
+
+  // Data freshness: latest date per manual ticker
+  try {
+    const manualTickers = ['PMI_RU','BCOM','URALS','CPI_MOM','CPI_YOY','KEY_RATE','RUONIA','USD_RUB','IMOEX','RGBI','RVI'];
+    let html = `<table><thead><tr><th>Ticker</th><th>Latest Date</th><th>Latest Value</th><th>Source</th><th>Age (days)</th></tr></thead><tbody>`;
+    for (const t of manualTickers) {
+      try {
+        const rows = await apiFetch(`/rest/v1/raw_market_data?ticker=eq.${t}&order=date.desc&limit=1&select=date,close_price,source`);
+        if (rows.length) {
+          const r = rows[0];
+          const age = Math.floor((Date.now() - new Date(r.date).getTime()) / 86400000);
+          const ageColor = age > 5 ? 'color:var(--error)' : age > 2 ? 'color:var(--warn)' : '';
+          html += `<tr><td><strong>${t}</strong></td><td>${r.date}</td><td>${r.close_price}</td><td>${r.source}</td><td style="${ageColor}">${age}d</td></tr>`;
+        } else {
+          html += `<tr><td><strong>${t}</strong></td><td colspan="4" style="color:var(--error)">No data</td></tr>`;
+        }
+      } catch(e) {
+        html += `<tr><td><strong>${t}</strong></td><td colspan="4">Error</td></tr>`;
+      }
+    }
+    html += '</tbody></table>';
+    document.getElementById('freshnessTable').innerHTML = html;
+  } catch(e) {}
+}
+
+// ── Tabs ──
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+}
+
+// ── Toast ──
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  setTimeout(() => el.className = 'toast', 3000);
+}
+
+// ── Init ──
+document.getElementById('fldDate').valueAsDate = new Date();
+</script>
+</body>
+</html>

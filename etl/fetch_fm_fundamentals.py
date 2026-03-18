@@ -49,13 +49,11 @@ def fetch_ticker_ratios(ticker: str) -> dict | None:
         resp.raise_for_status()
         data = resp.json()
 
-        # FM API v2 returns ratios as a top-level key (not inside "included")
         ratios_list = data.get("ratios", [])
         if not ratios_list:
             log.warning(f"{ticker}: no ratios data")
             return None
 
-        # Find the active=true entry (YTM = trailing 12 months)
         active_entry = None
         for entry in ratios_list:
             if entry.get("active") is True:
@@ -63,7 +61,6 @@ def fetch_ticker_ratios(ticker: str) -> dict | None:
                 break
 
         if active_entry is None:
-            # Fallback: try period=YTM
             for entry in ratios_list:
                 if entry.get("period") == "YTM":
                     active_entry = entry
@@ -75,13 +72,7 @@ def fetch_ticker_ratios(ticker: str) -> dict | None:
                               "FM API: no active=true ratios entry found")
             return None
 
-        # Extract metrics
         result = {}
-        # FM API v2 field names (discovered via debug logging):
-        #   pe, pbv, ps, pfcf, pcf, evebitda, ev_ebit, evs,
-        #   debt_ratio, debt_equity, roe, roa, roic, roce,
-        #   net_margin, ebitda_margin, gross_margin, operation_margin,
-        #   capex_revenue, capital, dpr, interest_coverage, ros
         field_map = {
             "pe": "pe", "pbv": "pbv", "ps": "ps",
             "evebitda": "evebitda", "ev_ebit": "ev_ebit",
@@ -117,18 +108,15 @@ def main():
         sys.exit(0)
 
     log.info("=== fetch_fm_fundamentals START ===")
-    run_id = create_etl_run("MOEX")  # We write to MOEX source (extra_json field)
+    run_id = create_etl_run("MOEX")
     total_loaded = 0
     total_skipped = 0
 
     try:
-        # Get L3 equity tickers
         instruments = get_active_tickers("L3")
         tickers = [i["ticker"] for i in instruments]
         log.info(f"Processing {len(tickers)} L3 tickers")
 
-        # Fetch FM ratios and merge into existing MOEX rows via SQL
-        # (COALESCE merge to preserve existing extra_json fields like OHLC)
         for i, ticker in enumerate(tickers):
             if i > 0:
                 time.sleep(FM_DELAY_SEC)
@@ -139,15 +127,8 @@ def main():
 
             ratios = fetch_ticker_ratios(ticker)
             if ratios:
-                # Merge into existing MOEX row's extra_json using PostgREST RPC
-                # We call a PATCH on the existing row to merge extra_json
-                merge_url = (
-                    f"{REST_URL}/raw_market_data"
-                    f"?date=eq.{TODAY}&ticker=eq.{ticker}&source=eq.MOEX&revision_num=eq.1"
-                )
+                merge_url = f"{REST_URL}/raw_market_data?date=eq.{TODAY}&ticker=eq.{ticker}&source=eq.MOEX&revision_num=eq.1"
                 patch_headers = {**HEADERS, "Prefer": "return=minimal"}
-                # Build merged extra_json via SQL jsonb concatenation
-                # PostgREST doesn't support jsonb merge directly, so we read + merge + write
                 get_resp = requests.get(merge_url, headers=HEADERS, timeout=10)
                 if get_resp.status_code == 200 and get_resp.json():
                     existing = get_resp.json()[0]
@@ -156,23 +137,18 @@ def main():
                         old_extra = json.loads(old_extra)
                     old_extra.update(ratios)
                     patch_payload = {"extra_json": json.dumps(old_extra)}
-                    patch_resp = requests.patch(
-                        merge_url, headers=patch_headers,
-                        json=patch_payload, timeout=10
-                    )
+                    patch_resp = requests.patch(merge_url, headers=patch_headers, json=patch_payload, timeout=10)
                     if patch_resp.status_code in (200, 204):
                         total_loaded += 1
                     else:
                         log.warning(f"{ticker}: PATCH failed {patch_resp.status_code}")
                         total_skipped += 1
                 else:
-                    # No existing MOEX row — skip (MOEX ETL must run first)
                     log.warning(f"{ticker}: no MOEX row for {TODAY}, skipping FM merge")
                     total_skipped += 1
             else:
                 total_skipped += 1
 
-        # Status
         if total_loaded == 0:
             status = "FAILED"
         elif total_loaded < len(tickers) * 0.8:

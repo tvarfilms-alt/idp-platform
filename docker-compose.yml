@@ -1,6 +1,15 @@
 version: "3.9"
 
+# IDP — Investment Decision Platform
+# Production deployment with all services
+#
+# Usage:
+#   cp .env.example .env    # Edit with real credentials
+#   docker-compose up -d    # Start all services
+#   docker-compose logs -f  # Watch logs
+
 services:
+  # ── PostgreSQL (local dev / VPS fallback) ──
   postgres:
     image: postgres:15-alpine
     container_name: idp-postgres
@@ -20,6 +29,51 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # ── Dashboard (static HTML + data.json) ──
+  dashboard:
+    image: nginx:alpine
+    container_name: idp-dashboard
+    restart: unless-stopped
+    ports:
+      - "${DASHBOARD_PORT:-8080}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./data.json:/usr/share/nginx/html/data.json:ro
+      - ./admin:/usr/share/nginx/html/admin:ro
+
+  # ── ETL + Compute Scheduler ──
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: idp-scheduler
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data.json:/app/data.json
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Backup (daily pg_dump at 03:00 MSK) ──
+  backup:
+    image: postgres:15-alpine
+    container_name: idp-backup
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    entrypoint: /bin/sh
+    command: >
+      -c "echo '0 0 * * * /backup.sh' | crontab - && crond -f -l 2"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pgdata:
