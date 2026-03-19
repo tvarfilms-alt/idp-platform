@@ -920,7 +920,12 @@
 
   
     /* Hide duplicate detail cards - Overview already has summary */
-    #page-overview .grid-4 { display: none; }
+    #overview > .grid-4 { display: none; }
+
+    /* Compact Overview for single viewport */
+    #overview > .grid-2 { margin-bottom: 12px; }
+    #overview .section-header { margin-top: 12px; margin-bottom: 8px; }
+
     /* Mobile support */
     @media (max-width: 768px) {
       .sidebar { position: fixed; left: -260px; transition: left 0.3s; z-index: 2000; }
