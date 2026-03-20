@@ -28,7 +28,7 @@
   },
   "l2": {
     "current": {
-      "date": "2026-03-19",
+      "date": "2026-03-20",
       "regime": "Risk-on",
       "multiplier": 1.2,
       "wms": 3.0
@@ -40,6 +40,12 @@
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-03-20",
+        "regime": "Risk-on",
+        "wms": 3.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-03-19",
         "regime": "Risk-on",
@@ -62,8 +68,8 @@
   },
   "l3": [
     {
-      "ticker": "NVTK",
-      "price": 1428.8,
+      "ticker": "PHOR",
+      "price": 7766.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -79,8 +85,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "ROSN",
-      "price": 512.2,
+      "ticker": "NVTK",
+      "price": 1412.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -97,7 +103,7 @@
     },
     {
       "ticker": "SNGSP",
-      "price": 49.05,
+      "price": 49.345,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -113,8 +119,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "FLOT",
-      "price": 92.06,
+      "ticker": "TATN",
+      "price": 653.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -130,8 +136,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "SIBN",
-      "price": 558.5,
+      "ticker": "ROSN",
+      "price": 512.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -147,8 +153,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "HYDR",
-      "price": 0.4547,
+      "ticker": "FLOT",
+      "price": 92.33,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -164,8 +170,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "TATN",
-      "price": 644.9,
+      "ticker": "TATNP",
+      "price": 602.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -181,8 +187,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "PHOR",
-      "price": 7582.0,
+      "ticker": "BANEP",
+      "price": 1011.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -198,8 +204,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "SNGS",
-      "price": 22.925,
+      "ticker": "HYDR",
+      "price": 0.4525,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -215,8 +221,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "LKOH",
-      "price": 5818.0,
+      "ticker": "GAZP",
+      "price": 130.74,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -232,8 +238,8 @@
       "signal": "BUY"
     },
     {
-      "ticker": "BANEP",
-      "price": 1006.5,
+      "ticker": "SIBN",
+      "price": 553.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -249,8 +255,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "SBER",
-      "price": 320.51,
+      "ticker": "LKOH",
+      "price": 5790.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -266,8 +272,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "SBERP",
-      "price": 320.23,
+      "ticker": "SNGS",
+      "price": 22.74,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -283,8 +289,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "GAZP",
-      "price": 129.76,
+      "ticker": "SBER",
+      "price": 320.77,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -300,8 +306,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "ALRS",
-      "price": 38.54,
+      "ticker": "SBERP",
+      "price": 320.49,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -318,7 +324,7 @@
     },
     {
       "ticker": "IRAO",
-      "price": 3.202,
+      "price": 3.207,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -334,8 +340,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "TATNP",
-      "price": 593.6,
+      "ticker": "ALRS",
+      "price": 38.43,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -351,8 +357,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "HEAD",
-      "price": 3032.0,
+      "ticker": "MGNT",
+      "price": 3237.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -368,8 +374,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "OZON",
-      "price": 4573.5,
+      "ticker": "MTSS",
+      "price": 227.7,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -385,8 +391,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "MTLRP",
-      "price": 69.1,
+      "ticker": "TRNFP",
+      "price": 1402.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -402,8 +408,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "MTSS",
-      "price": 227.65,
+      "ticker": "HEAD",
+      "price": 3019.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -419,8 +425,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "MOEX",
-      "price": 174.99,
+      "ticker": "PIKK",
+      "price": 470.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -436,8 +442,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "BANE",
-      "price": 1702.5,
+      "ticker": "MTLRP",
+      "price": 68.6,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -453,8 +459,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "YDEX",
-      "price": 4494.5,
+      "ticker": "MOEX",
+      "price": 174.08,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -470,8 +476,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "PIKK",
-      "price": 469.9,
+      "ticker": "VTBR",
+      "price": 85.965,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -487,8 +493,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "VTBR",
-      "price": 86.445,
+      "ticker": "YDEX",
+      "price": 4460.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -504,8 +510,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "TRNFP",
-      "price": 1397.4,
+      "ticker": "BSPB",
+      "price": 332.54,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -521,8 +527,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "MGNT",
-      "price": 3212.5,
+      "ticker": "MTLR",
+      "price": 73.7,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -538,8 +544,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "FEES",
-      "price": 0.07292,
+      "ticker": "OZON",
+      "price": 4503.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -556,7 +562,7 @@
     },
     {
       "ticker": "LEAS",
-      "price": 664.5,
+      "price": 661.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -572,8 +578,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "CBOM",
-      "price": 5.681,
+      "ticker": "GMKN",
+      "price": 152.52,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -590,7 +596,7 @@
     },
     {
       "ticker": "AFLT",
-      "price": 50.44,
+      "price": 50.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -607,7 +613,7 @@
     },
     {
       "ticker": "SMLT",
-      "price": 820.8,
+      "price": 818.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -623,8 +629,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "BSPB",
-      "price": 331.5,
+      "ticker": "CHMF",
+      "price": 910.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -640,8 +646,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "RTKM",
-      "price": 59.4,
+      "ticker": "BANE",
+      "price": 1671.5,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -657,8 +663,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "GMKN",
-      "price": 152.14,
+      "ticker": "MAGN",
+      "price": 29.19,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -674,8 +680,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "MTLR",
-      "price": 73.3,
+      "ticker": "CBOM",
+      "price": 5.614,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -691,8 +697,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "AFKS",
-      "price": 13.391,
+      "ticker": "NLMK",
+      "price": 102.96,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -708,8 +714,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "UPRO",
-      "price": 1.5005,
+      "ticker": "AFKS",
+      "price": 13.29,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -725,8 +731,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "CHMF",
-      "price": 906.0,
+      "ticker": "UPRO",
+      "price": 1.492,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -742,8 +748,8 @@
       "signal": "HOLD"
     },
     {
-      "ticker": "NLMK",
-      "price": 102.86,
+      "ticker": "RTKM",
+      "price": 58.59,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -759,8 +765,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "VKCO",
-      "price": 302.05,
+      "ticker": "SGZH",
+      "price": 1.217,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -776,8 +782,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "RUAL",
-      "price": 43.065,
+      "ticker": "FEES",
+      "price": 0.07118,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -793,8 +799,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "MAGN",
-      "price": 28.955,
+      "ticker": "MSNG",
+      "price": 2.147,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -810,8 +816,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "MSNG",
-      "price": 2.174,
+      "ticker": "VKCO",
+      "price": 294.75,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -828,7 +834,7 @@
     },
     {
       "ticker": "PLZL",
-      "price": 2322.4,
+      "price": 2283.0,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -844,8 +850,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "ENPG",
-      "price": 492.0,
+      "ticker": "POSI",
+      "price": 1119.2,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -861,8 +867,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "SGZH",
-      "price": 1.2065,
+      "ticker": "RUAL",
+      "price": 41.81,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -878,8 +884,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "POSI",
-      "price": 1132.0,
+      "ticker": "SELG",
+      "price": 53.88,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -895,8 +901,8 @@
       "signal": "AVOID"
     },
     {
-      "ticker": "SELG",
-      "price": 54.43,
+      "ticker": "ENPG",
+      "price": 471.95,
       "pe": null,
       "pbv": null,
       "ev_ebitda": null,
@@ -913,13 +919,13 @@
     }
   ],
   "bonds": {
-    "date": "2026-03-19",
+    "date": "2026-03-20",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 15.5,
-      "ruonia": 14.76,
+      "ruonia": 14.79,
       "cpi_yoy": 5.91,
       "real_yield": null,
       "rgbi_index": 119.79
@@ -935,7 +941,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-03-19",
+    "updated_at": "2026-03-20",
     "calc_versions": {
       "L1": {
         "id": 1,
@@ -958,6 +964,18 @@
       {
         "source": "CBR",
         "status": "SUCCESS",
+        "at": "2026-03-20T18:04:06.650259+00:00",
+        "rows": 4
+      },
+      {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-03-20T18:04:05.855488+00:00",
+        "rows": 50
+      },
+      {
+        "source": "CBR",
+        "status": "SUCCESS",
         "at": "2026-03-19T19:35:41.619291+00:00",
         "rows": 4
       },
@@ -972,18 +990,6 @@
         "status": "SUCCESS",
         "at": "2026-03-18T19:37:32.994187+00:00",
         "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-03-18T19:37:32.74784+00:00",
-        "rows": 50
-      },
-      {
-        "source": "MOEX",
-        "status": "PARTIAL",
-        "at": "2026-03-18T16:29:25.361353+00:00",
-        "rows": 3
       }
     ]
   }
