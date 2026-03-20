@@ -971,13 +971,13 @@
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-bottom: 30px; background-color: #1e1f2a; border: 1px solid #1e2433; overflow: hidden;">
           <div style="padding: 20px; text-align: center; border-right: 1px solid #1e2433; cursor: pointer;" onclick="switchPage('l1', event)">
             <div style="font-size: 11px; color: #8a8d96; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Macro</div>
-            <div style="font-size: 24px; font-weight: 700; color: #4CAF50; font-family: 'TT Commons Pro', sans-serif;">GROWTH</div>
-            <div style="font-size: 11px; color: #00e676; margin-top: 6px;">Expansion + Neutral</div>
+            <div style="font-size: 24px; font-weight: 700; color: #4CAF50; font-family: 'TT Commons Pro', sans-serif;" id="ov-macro-regime">GROWTH</div>
+            <div style="font-size: 11px; color: #00e676; margin-top: 6px;" id="ov-macro-desc">Expansion + Neutral</div>
           </div>
           <div style="padding: 20px; text-align: center; border-right: 1px solid #1e2433; cursor: pointer;" onclick="switchPage('l2', event)">
             <div style="font-size: 11px; color: #8a8d96; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Market</div>
-            <div style="font-size: 24px; font-weight: 700; color: #00e676; font-family: 'TT Commons Pro', sans-serif;">Risk-on</div>
-            <div style="font-size: 11px; color: #BEC0C7; margin-top: 6px;">Score: 8.5 / 10</div>
+            <div style="font-size: 24px; font-weight: 700; color: #00e676; font-family: 'TT Commons Pro', sans-serif;" id="ov-market-regime">Risk-on</div>
+            <div style="font-size: 11px; color: #BEC0C7; margin-top: 6px;" id="ov-market-score">Score: 8.5 / 10</div>
           </div>
           <div style="padding: 20px; text-align: center; border-right: 1px solid #1e2433; cursor: pointer;" onclick="switchPage('l3', event)">
             <div style="font-size: 11px; color: #8a8d96; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Stocks</div>
@@ -1854,6 +1854,22 @@
               }
             }
           }
+        }
+
+        // Update Overview summary cards from live data
+        const regimeColors = {"GOLDILOCKS":"#4CAF50","GROWTH":"#4CAF50","RECOVERY":"#8BC34A","REFLATION":"#FF9800","TRANSITION":"#FFC107","OVERHEATING":"#FF5722","SLOWDOWN":"#FF9800","STAGNATION":"#F44336","STAGFLATION":"#D32F2F","STRESS":"#B71C1C"};
+        if (live.l1 && live.l1.current) {
+          const r = live.l1.current.regime || '';
+          const el = document.getElementById('ov-macro-regime');
+          if (el) { el.textContent = r; el.style.color = regimeColors[r] || '#4CAF50'; }
+          const desc = document.getElementById('ov-macro-desc');
+          if (desc) desc.textContent = r + ' (' + (live.l1.current.risk_cap || '') + ')';
+        }
+        if (live.l2 && live.l2.current) {
+          const el = document.getElementById('ov-market-regime');
+          if (el) el.textContent = live.l2.current.regime || 'Risk-on';
+          const sc = document.getElementById('ov-market-score');
+          if (sc) sc.textContent = 'Score: ' + (10 - (live.l2.current.wms || 0)).toFixed(1) + ' / 10';
         }
         // Re-render current page
         if (typeof renderCurrentPage === 'function') renderCurrentPage();
