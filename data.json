@@ -35,18 +35,24 @@
   },
   "l2": {
     "current": {
-      "date": "2026-04-24",
+      "date": "2026-04-27",
       "regime": "Neutral",
       "multiplier": 1.0,
-      "wms": 9.0
+      "wms": 6.0
     },
     "scores": {
       "volatility": 0,
       "credit": 1,
-      "liquidity": 2,
+      "liquidity": 1,
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-04-27",
+        "regime": "Neutral",
+        "wms": 6.0,
+        "multiplier": 1.0
+      },
       {
         "date": "2026-04-24",
         "regime": "Neutral",
@@ -1082,7 +1088,7 @@
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 15.0,
-      "ruonia": 14.44,
+      "ruonia": 14.37,
       "cpi_yoy": 5.86,
       "real_yield": null,
       "rgbi_index": null
@@ -1121,31 +1127,31 @@
       {
         "source": "MOEX",
         "status": "SUCCESS",
-        "at": "2026-04-24T17:30:31.289469+00:00",
+        "at": "2026-04-27T17:49:03.755099+00:00",
         "rows": 50
       },
       {
         "source": "CBR",
         "status": "SUCCESS",
-        "at": "2026-04-24T17:30:29.541354+00:00",
+        "at": "2026-04-27T17:49:03.62575+00:00",
         "rows": 4
+      },
+      {
+        "source": "MOEX",
+        "status": "PARTIAL",
+        "at": "2026-04-27T07:53:53.511478+00:00",
+        "rows": 12
       },
       {
         "source": "CBR",
         "status": "SUCCESS",
-        "at": "2026-04-23T17:53:36.533596+00:00",
+        "at": "2026-04-27T07:53:50.906606+00:00",
         "rows": 4
       },
       {
         "source": "MOEX",
         "status": "SUCCESS",
-        "at": "2026-04-23T17:53:36.164712+00:00",
-        "rows": 50
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-04-22T17:32:44.521379+00:00",
+        "at": "2026-04-27T07:53:50.076516+00:00",
         "rows": 50
       }
     ]
