@@ -42,7 +42,7 @@
   },
   "l2": {
     "current": {
-      "date": "2026-04-30",
+      "date": "2026-05-01",
       "regime": "Risk-on",
       "multiplier": 1.2,
       "wms": 3.0
@@ -54,6 +54,12 @@
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-05-01",
+        "regime": "Risk-on",
+        "wms": 3.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-04-30",
         "regime": "Risk-on",
@@ -1150,6 +1156,18 @@
     },
     "last_etl": [
       {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-05-01T17:32:25.84497+00:00",
+        "rows": 50
+      },
+      {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-05-01T17:32:25.844788+00:00",
+        "rows": 4
+      },
+      {
         "source": "CBR",
         "status": "SUCCESS",
         "at": "2026-04-30T17:51:04.00374+00:00",
@@ -1165,18 +1183,6 @@
         "source": "MOEX",
         "status": "SUCCESS",
         "at": "2026-04-29T17:56:57.23739+00:00",
-        "rows": 50
-      },
-      {
-        "source": "CBR",
-        "status": "SUCCESS",
-        "at": "2026-04-29T17:56:50.727071+00:00",
-        "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-04-28T18:05:14.614277+00:00",
         "rows": 50
       }
     ]
