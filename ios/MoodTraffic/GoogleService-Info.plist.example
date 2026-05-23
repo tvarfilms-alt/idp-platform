@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ЭТО ШАБЛОН — НЕ настоящий файл.
+  1. В Firebase Console добавь iOS-приложение с bundle id: com.svetofor.moodtraffic
+  2. Скачай настоящий GoogleService-Info.plist
+  3. Положи его в папку Resources/ рядом с Assets.xcassets и переименуй точно в
+     GoogleService-Info.plist (без .example)
+  Подробности — в README.md
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>REPLACE_ME</string>
+	<key>GCM_SENDER_ID</key>
+	<string>REPLACE_ME</string>
+	<key>BUNDLE_ID</key>
+	<string>com.svetofor.moodtraffic</string>
+	<key>PROJECT_ID</key>
+	<string>REPLACE_ME</string>
+	<key>STORAGE_BUCKET</key>
+	<string>REPLACE_ME.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>REPLACE_ME</string>
+</dict>
+</plist>
