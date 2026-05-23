@@ -7,13 +7,13 @@
           ".read": "auth != null && data.child(auth.uid).exists()",
           "$uid": {
             ".read": "auth != null",
-            ".write": "auth != null && auth.uid === $uid"
+            ".write": "auth != null && (auth.uid === $uid || root.child('pairs').child($pairId).child('members').child(auth.uid).exists())"
           }
         },
         "ratings": {
           ".read": "auth != null && root.child('pairs').child($pairId).child('members').child(auth.uid).exists()",
           "$ratingId": {
-            ".write": "auth != null && newData.child('uid').val() === auth.uid"
+            ".write": "auth != null && ((newData.exists() && newData.child('uid').val() === auth.uid) || (!newData.exists() && root.child('pairs').child($pairId).child('members').child(auth.uid).exists()))"
           }
         }
       }

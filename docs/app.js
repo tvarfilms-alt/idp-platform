@@ -4,7 +4,7 @@ import {
   getAuth, signInAnonymously, onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
-  getDatabase, ref, set, onValue, serverTimestamp,
+  getDatabase, ref, set, update, remove, onValue, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
 // ---------- constants & helpers ----------
@@ -29,13 +29,21 @@ const store = {
   set colorHex(v) { localStorage.setItem("colorHex", v); },
   get onboarded() { return localStorage.getItem("onboarded") === "1"; },
   set onboarded(v) { localStorage.setItem("onboarded", v ? "1" : "0"); },
+  get notifHour() { return Number(localStorage.getItem("notifHour") ?? 21); },
+  set notifHour(v) { localStorage.setItem("notifHour", String(v)); },
+  get notifMinute() { return Number(localStorage.getItem("notifMinute") ?? 0); },
+  set notifMinute(v) { localStorage.setItem("notifMinute", String(v)); },
 };
 
-const todayKey = () => {
-  const d = new Date();
+const dayKeyOf = (d) => {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${m}-${day}`;
+};
+const todayKey = () => dayKeyOf(new Date());
+const localTz = () => {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; }
+  catch (_) { return "UTC"; }
 };
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -56,9 +64,17 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 let uid = null;
-let ratings = [];     // [{uid,name,date,value}]
-let members = [];     // [{uid,name,colorHex}]
+let ratings = [];
+let members = [];
 let unsub = [];
+
+// UI state
+let pending = null;       // selected-but-not-saved mood
+let editing = false;      // re-voting an already saved day
+let chartDays = 30;       // preset range length
+let customMode = false;
+let chartFrom = null;     // Date (custom)
+let chartTo = null;       // Date (custom)
 
 function stopListeners() {
   unsub.forEach((fn) => { try { fn(); } catch (_) {} });
@@ -67,16 +83,12 @@ function stopListeners() {
 
 function startListeners(pairId) {
   stopListeners();
-
   unsub.push(onValue(ref(db, `pairs/${pairId}/ratings`), (snap) => {
-    const val = snap.val() || {};
-    ratings = Object.values(val);
+    ratings = Object.values(snap.val() || {});
     if (store.onboarded) renderMain();
   }, (e) => console.warn("ratings listener", e)));
-
   unsub.push(onValue(ref(db, `pairs/${pairId}/members`), (snap) => {
-    const val = snap.val() || {};
-    members = Object.values(val);
+    members = Object.values(snap.val() || {});
     if (store.onboarded) renderMain();
   }, (e) => console.warn("members listener", e)));
 }
@@ -94,6 +106,17 @@ async function submitRating(value) {
   await set(ref(db, `pairs/${store.pairId}/ratings/${date}_${uid}`), {
     uid, name: store.name, date, value, updatedAt: serverTimestamp(),
   });
+}
+
+async function deleteMember(memberUid) {
+  if (!store.pairId) return;
+  const base = `pairs/${store.pairId}`;
+  // remove all of that member's ratings, then the member node itself
+  const theirs = ratings.filter((r) => r.uid === memberUid);
+  await Promise.all(theirs.map((r) =>
+    remove(ref(db, `${base}/ratings/${r.date}_${memberUid}`))));
+  await remove(ref(db, `${base}/members/${memberUid}`));
+  if (memberUid === uid) await remove(ref(db, `pushSubs/${uid}`)).catch(() => {});
 }
 
 const myToday = () => ratings.find((r) => r.uid === uid && r.date === todayKey());
@@ -146,13 +169,16 @@ function renderOnboarding() {
 
 let _lastMainHash = "";
 function renderMain() {
-  const hash = JSON.stringify({ r: ratings, m: members, n: notifHint() });
+  const hash = JSON.stringify({
+    r: ratings, m: members, n: notifHint(), e: editing, p: pending,
+    cd: chartDays, cm: customMode,
+    cf: chartFrom ? chartFrom.getTime() : 0, ct: chartTo ? chartTo.getTime() : 0,
+  });
   const existing = $(".main");
   if (existing && hash === _lastMainHash) return;
   _lastMainHash = hash;
 
   const node = existing || mountTemplate("tpl-main");
-
   $("#btn-settings", node).onclick = renderSettings;
 
   const banner = $("#notif-banner", node);
@@ -161,6 +187,8 @@ function renderMain() {
   else banner.classList.add("hidden");
 
   const mine = myToday();
+  const locked = !!mine && !editing;
+
   const myStatus = $("#my-status", node);
   if (mine) {
     myStatus.textContent = `${MOOD[mine.value].emoji}  ${MOOD[mine.value].title}`;
@@ -172,11 +200,32 @@ function renderMain() {
 
   node.querySelectorAll(".mood").forEach((btn) => {
     const value = Number(btn.dataset.value);
-    btn.classList.toggle("chosen", mine && mine.value === value);
-    btn.classList.toggle("dim", mine && mine.value !== value);
-    btn.onclick = () => submitRating(value);
+    const selected = locked ? mine.value === value : pending === value;
+    const someChosen = locked ? true : pending !== null;
+    btn.classList.toggle("chosen", selected);
+    btn.classList.toggle("dim", someChosen && !selected);
+    btn.disabled = locked;
+    btn.onclick = () => {
+      if (locked) return;
+      pending = value;
+      renderMain();
+    };
   });
 
+  const commitBtn = $("#btn-commit", node);
+  const revoteBtn = $("#btn-revote", node);
+  commitBtn.classList.toggle("hidden", locked || pending === null);
+  revoteBtn.classList.toggle("hidden", !locked);
+  commitBtn.onclick = async () => {
+    if (pending === null) return;
+    commitBtn.disabled = true;
+    await submitRating(pending);
+    pending = null; editing = false; commitBtn.disabled = false;
+    renderMain();
+  };
+  revoteBtn.onclick = () => { editing = true; pending = mine.value; renderMain(); };
+
+  // partners
   const partnersCard = $("#partners", node);
   const list = $("#partners-list", node);
   const others = members.filter((m) => m.uid !== uid);
@@ -198,6 +247,42 @@ function renderMain() {
     partnersCard.classList.add("hidden");
   }
 
+  // chart range chips
+  node.querySelectorAll("#chart-range button").forEach((b) => {
+    const isCustom = b.dataset.custom === "1";
+    const active = isCustom ? customMode : (!customMode && chartDays === Number(b.dataset.days));
+    b.classList.toggle("active", active);
+    b.onclick = () => {
+      if (isCustom) {
+        customMode = true;
+        if (!chartFrom || !chartTo) {
+          chartTo = new Date(); chartTo.setHours(0, 0, 0, 0);
+          chartFrom = new Date(chartTo); chartFrom.setDate(chartTo.getDate() - 29);
+        }
+      } else {
+        customMode = false;
+        chartDays = Number(b.dataset.days);
+      }
+      renderMain();
+    };
+  });
+
+  const customBox = $("#custom-range", node);
+  customBox.classList.toggle("hidden", !customMode);
+  const fromIn = $("#range-from", node);
+  const toIn = $("#range-to", node);
+  if (customMode && chartFrom && chartTo) {
+    fromIn.value = dayKeyOf(chartFrom);
+    toIn.value = dayKeyOf(chartTo);
+  }
+  const onDate = () => {
+    const f = parseDateInput(fromIn.value);
+    const t = parseDateInput(toIn.value);
+    if (f && t && f <= t) { chartFrom = f; chartTo = t; renderMain(); }
+  };
+  fromIn.onchange = onDate;
+  toIn.onchange = onDate;
+
   renderChart($("#chart", node));
 }
 
@@ -207,25 +292,55 @@ function renderSettings() {
   $("#set-name", node).textContent = store.name;
   $("#set-pair", node).textContent = store.pairId;
 
+  // notification time
+  const timeIn = $("#notif-time", node);
+  timeIn.value = `${String(store.notifHour).padStart(2, "0")}:${String(store.notifMinute).padStart(2, "0")}`;
+  timeIn.onchange = async () => {
+    const [h, m] = timeIn.value.split(":").map(Number);
+    if (Number.isInteger(h) && Number.isInteger(m)) {
+      store.notifHour = h; store.notifMinute = m;
+      await savePushPrefs();
+    }
+  };
+
   const stateEl = $("#notif-state", node);
   const enableBtn = $("#btn-enable-notif", node);
   refreshNotifState(stateEl, enableBtn);
-
   enableBtn.onclick = async () => {
     enableBtn.disabled = true;
     enableBtn.textContent = "Подключаем…";
-    try {
-      await enableNotifications(false);
-    } catch (e) {
-      alert("Не удалось включить: " + (e.message || e));
-    }
+    try { await enableNotifications(false); }
+    catch (e) { alert("Не удалось включить: " + (e.message || e)); }
     enableBtn.disabled = false;
     enableBtn.textContent = "Включить напоминания";
     refreshNotifState(stateEl, enableBtn);
   };
 
+  // members admin
+  const adminBox = $("#members-admin", node);
+  adminBox.innerHTML = "";
+  members.forEach((m) => {
+    const row = document.createElement("div");
+    row.className = "member-admin";
+    const isMe = m.uid === uid;
+    row.innerHTML = `<span class="dot" style="background:${m.colorHex}"></span>
+      <span class="name">${escapeHtml(m.name)}</span>
+      ${isMe ? '<span class="me-tag">это вы</span>' : ""}
+      <button class="del" aria-label="Удалить">🗑️</button>`;
+    row.querySelector(".del").onclick = async () => {
+      const msg = isMe
+        ? "Удалить себя из пары вместе со своими оценками? Приложение выйдет на этом устройстве."
+        : `Удалить «${m.name}» и все его(её) оценки? Это нельзя отменить.`;
+      if (!confirm(msg)) return;
+      await deleteMember(m.uid);
+      if (isMe) { stopListeners(); store.onboarded = false; renderOnboarding(); }
+      else renderSettings();
+    };
+    adminBox.appendChild(row);
+  });
+
   $("#btn-reset", node).onclick = () => {
-    if (!confirm("Сбросить связь и имя на этом устройстве? Оценки в облаке сохранятся.")) return;
+    if (!confirm("Выйти на этом устройстве? Связь и имя сбросятся, но данные в облаке останутся.")) return;
     stopListeners();
     store.onboarded = false;
     renderOnboarding();
@@ -234,71 +349,88 @@ function renderSettings() {
 
 // ---------- chart (hand-drawn SVG) ----------
 
-function renderChart(container) {
-  const days = 14;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const dayList = [];
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today); d.setDate(today.getDate() - i);
-    dayList.push(d);
-  }
-  const keyOf = (d) => {
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${m}-${day}`;
-  };
-  const dayKeys = dayList.map(keyOf);
+function parseDateInput(v) {
+  if (!v) return null;
+  const [y, m, d] = v.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
 
-  const recent = ratings.filter((r) => dayKeys.includes(r.date));
+function buildDayList() {
+  let start, end;
+  if (customMode && chartFrom && chartTo) {
+    start = new Date(chartFrom); end = new Date(chartTo);
+  } else {
+    end = new Date(); end.setHours(0, 0, 0, 0);
+    start = new Date(end); start.setDate(end.getDate() - (chartDays - 1));
+  }
+  start.setHours(0, 0, 0, 0); end.setHours(0, 0, 0, 0);
+  const list = [];
+  const cur = new Date(start);
+  let guard = 0;
+  while (cur <= end && guard < 800) {
+    list.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+    guard++;
+  }
+  return list;
+}
+
+function renderChart(container) {
+  const dayList = buildDayList();
+  const dayKeys = dayList.map(dayKeyOf);
+  const keySet = new Set(dayKeys);
+  const recent = ratings.filter((r) => keySet.has(r.date));
+
   if (!recent.length) {
-    container.innerHTML = `<div class="chart-empty">Здесь появится график, как только вы начнёте оценивать дни.</div>`;
+    container.innerHTML = `<div class="chart-empty">Нет оценок за выбранный период.</div>`;
     return;
   }
 
   const people = [...new Set(recent.map((r) => r.uid))];
-  const colorFor = (puid) => (members.find((m) => m.uid === puid)?.colorHex) || "#4f8dfd";
-  const nameFor = (puid) => (members.find((m) => m.uid === puid)?.name) || puid.slice(0, 4);
+  const colorFor = (p) => (members.find((m) => m.uid === p)?.colorHex) || "#4f8dfd";
+  const nameFor = (p) => (members.find((m) => m.uid === p)?.name) || p.slice(0, 4);
 
   const W = 560, H = 240, padL = 34, padR = 14, padT = 16, padB = 28;
   const plotW = W - padL - padR, plotH = H - padT - padB;
-  const xAt = (i) => padL + (dayList.length === 1 ? plotW / 2 : (plotW * i) / (dayList.length - 1));
+  const n = dayList.length;
+  const xAt = (i) => padL + (n <= 1 ? plotW / 2 : (plotW * i) / (n - 1));
   const yAt = (v) => padT + plotH - ((v - 1) / 2) * plotH;
+  const dotR = n > 120 ? 2.5 : n > 60 ? 3.5 : n > 31 ? 5 : 6;
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
-
   [1, 2, 3].forEach((v) => {
     const y = yAt(v);
     svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#2a2d36" stroke-width="1"/>`;
     svg += `<text x="6" y="${y + 5}" font-size="15">${MOOD[v].emoji}</text>`;
   });
 
+  const step = Math.max(1, Math.ceil(n / 6));
   dayList.forEach((d, i) => {
-    if (i % 3 !== 0 && i !== dayList.length - 1) return;
+    if (i % step !== 0 && i !== n - 1) return;
     const label = `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
     svg += `<text x="${xAt(i)}" y="${H - 8}" font-size="10" fill="#9aa0aa" text-anchor="middle">${label}</text>`;
   });
 
-  people.forEach((puid) => {
+  people.forEach((p) => {
     const pts = [];
     dayKeys.forEach((k, i) => {
-      const r = recent.find((x) => x.uid === puid && x.date === k);
+      const r = recent.find((x) => x.uid === p && x.date === k);
       if (r) pts.push({ x: xAt(i), y: yAt(r.value), v: r.value });
     });
     if (pts.length > 1) {
-      const dAttr = pts.map((p, i) => (i ? "L" : "M") + p.x.toFixed(1) + " " + p.y.toFixed(1)).join(" ");
-      svg += `<path d="${dAttr}" fill="none" stroke="${colorFor(puid)}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+      const dAttr = pts.map((pt, i) => (i ? "L" : "M") + pt.x.toFixed(1) + " " + pt.y.toFixed(1)).join(" ");
+      svg += `<path d="${dAttr}" fill="none" stroke="${colorFor(p)}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
     }
-    pts.forEach((p) => {
-      svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="6" fill="${MOOD[p.v].color}" stroke="#0e0f13" stroke-width="2"/>`;
+    pts.forEach((pt) => {
+      svg += `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${dotR}" fill="${MOOD[pt.v].color}" stroke="#0e0f13" stroke-width="2"/>`;
     });
   });
-
   svg += `</svg>`;
 
-  const legend = people.map((puid) =>
-    `<span class="item"><span class="dot" style="background:${colorFor(puid)}"></span>${escapeHtml(nameFor(puid))}</span>`
+  const legend = people.map((p) =>
+    `<span class="item"><span class="dot" style="background:${colorFor(p)}"></span>${escapeHtml(nameFor(p))}</span>`
   ).join("");
-
   container.innerHTML = svg + `<div class="legend">${legend}</div>`;
 }
 
@@ -307,7 +439,6 @@ function renderChart(container) {
 function pushSupported() {
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
-
 function isStandalone() {
   return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
@@ -353,6 +484,16 @@ function urlBase64ToUint8Array(base64String) {
   return arr;
 }
 
+// Saves the user's reminder time/timezone (without changing the subscription).
+async function savePushPrefs() {
+  if (!uid) return;
+  await update(ref(db, `pushSubs/${uid}`), {
+    uid, name: store.name,
+    hour: store.notifHour, minute: store.notifMinute, tz: localTz(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
 async function enableNotifications(silent) {
   if (!pushSupported()) {
     if (!silent) throw new Error("web-push не поддерживается. Добавьте на домашний экран (iOS 16.4+).");
@@ -371,10 +512,11 @@ async function enableNotifications(silent) {
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
   }
-  // Subscriptions live at a top-level node so the daily sender reads them all.
-  await set(ref(db, `pushSubs/${uid}`), {
+  await update(ref(db, `pushSubs/${uid}`), {
     uid, name: store.name,
     subscription: JSON.parse(JSON.stringify(sub)),
+    enabled: true,
+    hour: store.notifHour, minute: store.notifMinute, tz: localTz(),
     updatedAt: serverTimestamp(),
   });
   _lastMainHash = "";

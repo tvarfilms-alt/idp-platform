@@ -126,6 +126,60 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 .partner .name { flex: 1; }
 
+.secondary {
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.9rem;
+  border-radius: 14px;
+  background: var(--card-2);
+  color: var(--text);
+  margin-top: 0.2rem;
+}
+
+/* Chart range chips */
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem; }
+.chips button {
+  background: var(--card-2);
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+}
+.chips button.active { background: var(--accent); color: #fff; }
+
+.custom-range { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; }
+.custom-range input[type=date] {
+  flex: 1;
+  background: var(--card-2);
+  color: var(--text);
+  border: 1px solid #2c2f38;
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Members admin */
+.member-admin { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; }
+.member-admin .name { flex: 1; }
+.member-admin .del {
+  background: transparent;
+  color: var(--red);
+  font-size: 1.2rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+}
+.member-admin .me-tag { font-size: 0.75rem; color: var(--muted); }
+
+input[type=time] {
+  background: var(--card-2);
+  color: var(--text);
+  border: 1px solid #2c2f38;
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  font-size: 1rem;
+}
+
 /* Chart */
 #chart svg { width: 100%; height: auto; display: block; }
 .chart-empty { color: var(--muted); padding: 2rem 0; text-align: center; font-size: 0.9rem; }

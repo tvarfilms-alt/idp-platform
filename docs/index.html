@@ -65,13 +65,29 @@
         <button class="mood red"    data-value="1"><span>🔴</span> Тяжёлый день</button>
       </div>
 
+      <button id="btn-commit" class="primary hidden">Зафиксировать</button>
+      <button id="btn-revote" class="secondary hidden">Переголосовать</button>
+
       <section id="partners" class="card hidden">
         <h2>Сегодня у вас</h2>
         <div id="partners-list"></div>
       </section>
 
       <section class="card">
-        <h2>Последние 2 недели</h2>
+        <h2>История настроения</h2>
+        <div id="chart-range" class="chips">
+          <button data-days="7">Неделя</button>
+          <button data-days="30">Месяц</button>
+          <button data-days="90">3 мес</button>
+          <button data-days="180">6 мес</button>
+          <button data-days="365">Год</button>
+          <button data-custom="1">Свои даты</button>
+        </div>
+        <div id="custom-range" class="custom-range hidden">
+          <input type="date" id="range-from" />
+          <span>—</span>
+          <input type="date" id="range-to" />
+        </div>
         <div id="chart"></div>
       </section>
     </div>
@@ -85,17 +101,30 @@
         <div class="title">Настройки</div>
         <span style="width:2.4rem"></span>
       </header>
+
       <section class="card">
         <div class="row"><span class="muted">Имя</span><span id="set-name"></span></div>
         <div class="row"><span class="muted">Код пары</span><span id="set-pair"></span></div>
       </section>
+
       <section class="card">
         <h2>Напоминание</h2>
-        <p class="muted">Push приходит каждый день автоматически (его рассылает сервер по расписанию). Время меняется в настройках проекта — см. README.</p>
-        <div id="notif-state" class="muted"></div>
+        <p class="muted">Каждый день в это время придёт push «оцени день». Время у каждого своё.</p>
+        <label class="row">
+          <span>Время напоминания</span>
+          <input type="time" id="notif-time" />
+        </label>
+        <div id="notif-state" class="muted" style="margin:.6rem 0"></div>
         <button id="btn-enable-notif" class="primary">Включить напоминания</button>
       </section>
-      <button id="btn-reset" class="danger">Сбросить и выйти</button>
+
+      <section class="card">
+        <h2>Участники</h2>
+        <p class="muted">Лишний или случайный аккаунт можно удалить (вместе с его оценками).</p>
+        <div id="members-admin"></div>
+      </section>
+
+      <button id="btn-reset" class="danger">Выйти на этом устройстве</button>
     </div>
   </template>
 

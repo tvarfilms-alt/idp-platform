@@ -1,4 +1,4 @@
-const CACHE = "svetofor-v1";
+const CACHE = "svetofor-v2";
 const SHELL = [
   "./",
   "index.html",
@@ -25,12 +25,19 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// App shell: cache-first. Everything else (Firebase, CDN): straight to network.
+// App shell: network-first so code updates show up on reload; fall back to the
+// cache when offline. Other origins (Firebase, CDN) bypass the worker.
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
   event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req).catch(() => caches.match("index.html")))
+    fetch(req)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(req).then((c) => c || caches.match("index.html")))
   );
 });
 
