@@ -3,6 +3,7 @@
 //
 // Required env vars (set as GitHub Secrets):
 //   FIREBASE_SERVICE_ACCOUNT  - full service-account JSON (one line)
+//   FIREBASE_DB_URL           - Realtime Database URL (https://...firebasedatabase.app)
 //   VAPID_PUBLIC_KEY          - same public key as docs/config.js
 //   VAPID_PRIVATE_KEY         - matching private key (keep secret!)
 //   VAPID_SUBJECT             - e.g. "mailto:you@example.com"
@@ -17,8 +18,11 @@ function requireEnv(name) {
 }
 
 const serviceAccount = JSON.parse(requireEnv("FIREBASE_SERVICE_ACCOUNT"));
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-const db = admin.firestore();
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: requireEnv("FIREBASE_DB_URL"),
+});
+const db = admin.database();
 
 webpush.setVapidDetails(
   requireEnv("VAPID_SUBJECT"),
@@ -33,19 +37,20 @@ const payload = JSON.stringify({
 });
 
 (async () => {
-  const snap = await db.collectionGroup("pushSubs").get();
+  const snap = await db.ref("pushSubs").once("value");
+  const subs = snap.val() || {};
+  const entries = Object.entries(subs);
   let ok = 0, removed = 0, failed = 0;
 
-  for (const docSnap of snap.docs) {
-    const sub = docSnap.data().subscription;
+  for (const [key, rec] of entries) {
+    const sub = rec && rec.subscription;
     if (!sub || !sub.endpoint) continue;
     try {
       await webpush.sendNotification(sub, payload);
       ok++;
     } catch (err) {
-      // 404/410 mean the subscription is gone — clean it up.
       if (err.statusCode === 404 || err.statusCode === 410) {
-        await docSnap.ref.delete();
+        await db.ref(`pushSubs/${key}`).remove();
         removed++;
       } else {
         failed++;
@@ -54,6 +59,6 @@ const payload = JSON.stringify({
     }
   }
 
-  console.log(`done: sent=${ok} removed=${removed} failed=${failed} total=${snap.size}`);
+  console.log(`done: sent=${ok} removed=${removed} failed=${failed} total=${entries.length}`);
   process.exit(0);
 })().catch((e) => { console.error(e); process.exit(1); });

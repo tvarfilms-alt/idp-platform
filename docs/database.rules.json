@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "pairs": {
+      "$pairId": {
+        ".read": "auth != null && data.child('members').child(auth.uid).exists()",
+        "members": {
+          ".read": "auth != null && data.child(auth.uid).exists()",
+          "$uid": {
+            ".read": "auth != null",
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        },
+        "ratings": {
+          ".read": "auth != null && root.child('pairs').child($pairId).child('members').child(auth.uid).exists()",
+          "$ratingId": {
+            ".write": "auth != null && newData.child('uid').val() === auth.uid"
+          }
+        }
+      }
+    },
+    "pushSubs": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}

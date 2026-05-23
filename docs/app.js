@@ -4,9 +4,8 @@ import {
   getAuth, signInAnonymously, onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, collection, query, orderBy,
-  onSnapshot, serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  getDatabase, ref, set, onValue, serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
 // ---------- constants & helpers ----------
 
@@ -54,7 +53,7 @@ function mountTemplate(id) {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getDatabase(app);
 
 let uid = null;
 let ratings = [];     // [{uid,name,date,value}]
@@ -62,38 +61,39 @@ let members = [];     // [{uid,name,colorHex}]
 let unsub = [];
 
 function stopListeners() {
-  unsub.forEach((fn) => fn());
+  unsub.forEach((fn) => { try { fn(); } catch (_) {} });
   unsub = [];
 }
 
 function startListeners(pairId) {
   stopListeners();
-  const rq = query(collection(db, `pairs/${pairId}/ratings`), orderBy("date"));
-  unsub.push(onSnapshot(rq, (snap) => {
-    ratings = snap.docs.map((d) => d.data());
+
+  unsub.push(onValue(ref(db, `pairs/${pairId}/ratings`), (snap) => {
+    const val = snap.val() || {};
+    ratings = Object.values(val);
     if (store.onboarded) renderMain();
   }, (e) => console.warn("ratings listener", e)));
 
-  const mc = collection(db, `pairs/${pairId}/members`);
-  unsub.push(onSnapshot(mc, (snap) => {
-    members = snap.docs.map((d) => d.data());
+  unsub.push(onValue(ref(db, `pairs/${pairId}/members`), (snap) => {
+    const val = snap.val() || {};
+    members = Object.values(val);
     if (store.onboarded) renderMain();
   }, (e) => console.warn("members listener", e)));
 }
 
 async function upsertMember() {
   if (!uid || !store.pairId) return;
-  await setDoc(doc(db, `pairs/${store.pairId}/members/${uid}`), {
+  await set(ref(db, `pairs/${store.pairId}/members/${uid}`), {
     uid, name: store.name, colorHex: store.colorHex, joinedAt: serverTimestamp(),
-  }, { merge: true });
+  });
 }
 
 async function submitRating(value) {
   if (!uid || !store.pairId) return;
   const date = todayKey();
-  await setDoc(doc(db, `pairs/${store.pairId}/ratings/${date}_${uid}`), {
+  await set(ref(db, `pairs/${store.pairId}/ratings/${date}_${uid}`), {
     uid, name: store.name, date, value, updatedAt: serverTimestamp(),
-  }, { merge: true });
+  });
 }
 
 const myToday = () => ratings.find((r) => r.uid === uid && r.date === todayKey());
@@ -140,14 +140,12 @@ function renderOnboarding() {
     startListeners(store.pairId);
     store.onboarded = true;
     renderMain();
-    // try to enable notifications right away (best on installed PWA)
     enableNotifications(true).catch(() => {});
   };
 }
 
 let _lastMainHash = "";
 function renderMain() {
-  // Avoid pointless re-mounts that would drop focus / re-trigger animations.
   const hash = JSON.stringify({ r: ratings, m: members, n: notifHint() });
   const existing = $(".main");
   if (existing && hash === _lastMainHash) return;
@@ -157,13 +155,11 @@ function renderMain() {
 
   $("#btn-settings", node).onclick = renderSettings;
 
-  // notification banner
   const banner = $("#notif-banner", node);
   const hint = notifHint();
   if (hint) { banner.classList.remove("hidden"); banner.textContent = hint; }
   else banner.classList.add("hidden");
 
-  // my today
   const mine = myToday();
   const myStatus = $("#my-status", node);
   if (mine) {
@@ -174,7 +170,6 @@ function renderMain() {
     myStatus.style.color = "";
   }
 
-  // buttons
   node.querySelectorAll(".mood").forEach((btn) => {
     const value = Number(btn.dataset.value);
     btn.classList.toggle("chosen", mine && mine.value === value);
@@ -182,7 +177,6 @@ function renderMain() {
     btn.onclick = () => submitRating(value);
   });
 
-  // partners
   const partnersCard = $("#partners", node);
   const list = $("#partners-list", node);
   const others = members.filter((m) => m.uid !== uid);
@@ -204,7 +198,6 @@ function renderMain() {
     partnersCard.classList.add("hidden");
   }
 
-  // chart
   renderChart($("#chart", node));
 }
 
@@ -269,25 +262,22 @@ function renderChart(container) {
   const W = 560, H = 240, padL = 34, padR = 14, padT = 16, padB = 28;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const xAt = (i) => padL + (dayList.length === 1 ? plotW / 2 : (plotW * i) / (dayList.length - 1));
-  const yAt = (v) => padT + plotH - ((v - 1) / 2) * plotH; // v in 1..3
+  const yAt = (v) => padT + plotH - ((v - 1) / 2) * plotH;
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
 
-  // y grid + emoji labels
   [1, 2, 3].forEach((v) => {
     const y = yAt(v);
     svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#2a2d36" stroke-width="1"/>`;
     svg += `<text x="6" y="${y + 5}" font-size="15">${MOOD[v].emoji}</text>`;
   });
 
-  // x labels (every 3rd day)
   dayList.forEach((d, i) => {
     if (i % 3 !== 0 && i !== dayList.length - 1) return;
     const label = `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
     svg += `<text x="${xAt(i)}" y="${H - 8}" font-size="10" fill="#9aa0aa" text-anchor="middle">${label}</text>`;
   });
 
-  // one line per person
   people.forEach((puid) => {
     const pts = [];
     dayKeys.forEach((k, i) => {
@@ -381,11 +371,12 @@ async function enableNotifications(silent) {
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
   }
-  await setDoc(doc(db, `pairs/${store.pairId}/pushSubs/${uid}`), {
+  // Subscriptions live at a top-level node so the daily sender reads them all.
+  await set(ref(db, `pushSubs/${uid}`), {
     uid, name: store.name,
     subscription: JSON.parse(JSON.stringify(sub)),
     updatedAt: serverTimestamp(),
-  }, { merge: true });
+  });
   _lastMainHash = "";
 }
 
