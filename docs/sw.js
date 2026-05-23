@@ -1,4 +1,4 @@
-const CACHE = "svetofor-v2";
+const CACHE = "svetofor-v3";
 const SHELL = [
   "./",
   "index.html",

@@ -123,8 +123,13 @@ async function deleteMember(memberUid) {
 const ratingFor = (u, date) => ratings.find((r) => r.uid === u && r.date === date);
 const mySelected = () => ratingFor(uid, selectedDate);
 const fmtShort = (dateStr) => {
-  const [y, m, d] = dateStr.split("-");
+  const [, m, d] = dateStr.split("-");
   return `${d}.${m}`;
+};
+const ruDate = (dateStr) => {
+  const d = parseDateInput(dateStr);
+  try { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(d); }
+  catch (_) { return fmtShort(dateStr); }
 };
 const shiftDate = (dateStr, days) => {
   const d = parseDateInput(dateStr);
@@ -199,6 +204,7 @@ function renderMain() {
 
   // date selector
   const isToday = selectedDate === todayKey();
+  const isYesterday = selectedDate === shiftDate(todayKey(), -1);
   const dateIn = $("#rate-date", node);
   dateIn.max = todayKey();
   dateIn.value = selectedDate;
@@ -218,9 +224,11 @@ function renderMain() {
   const nextBtn = $("#date-next", node);
   nextBtn.disabled = isToday;
   nextBtn.onclick = () => goDate(1);
+  $("#date-label", node).textContent =
+    isToday ? "Сегодня" : isYesterday ? "Вчера" : ruDate(selectedDate);
   $("#rate-q", node).textContent = isToday
     ? "Как прошёл твой день?"
-    : `Как прошёл день ${fmtShort(selectedDate)}?`;
+    : `Как прошёл этот день?`;
 
   const mine = mySelected();
   const locked = !!mine && !editing;
@@ -265,7 +273,7 @@ function renderMain() {
   const partnersCard = $("#partners", node);
   const list = $("#partners-list", node);
   const others = members.filter((m) => m.uid !== uid);
-  $("#partners-title", node).textContent = isToday ? "Сегодня у вас" : `${fmtShort(selectedDate)} — у вас`;
+  $("#partners-title", node).textContent = isToday ? "Сегодня у вас" : `${ruDate(selectedDate)} — у вас`;
   if (others.length) {
     partnersCard.classList.remove("hidden");
     list.innerHTML = "";
@@ -586,7 +594,17 @@ function escapeHtml(s) {
 
 async function main() {
   if ("serviceWorker" in navigator) {
-    try { await navigator.serviceWorker.register("sw.js"); } catch (e) { console.warn("sw", e); }
+    // Auto-reload once when a new version takes control, so updates always apply.
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      refreshing = true;
+      location.reload();
+    });
+    try {
+      const reg = await navigator.serviceWorker.register("sw.js");
+      reg.update().catch(() => {});
+    } catch (e) { console.warn("sw", e); }
   }
 
   onAuthStateChanged(auth, (user) => {

@@ -48,7 +48,7 @@
   <template id="tpl-main">
     <div class="screen main">
       <header class="topbar">
-        <div class="title">Сегодня</div>
+        <div class="title">🚦 Светофор</div>
         <button id="btn-settings" class="icon-btn" aria-label="Настройки">⚙️</button>
       </header>
 
@@ -57,7 +57,10 @@
       <div class="today-status">
         <div class="date-row">
           <button id="date-prev" class="date-nav" aria-label="Предыдущий день">‹</button>
-          <input type="date" id="rate-date" />
+          <span class="date-pill-wrap">
+            <span id="date-label" class="date-pill">Сегодня</span>
+            <input type="date" id="rate-date" aria-label="Выбрать дату" />
+          </span>
           <button id="date-next" class="date-nav" aria-label="Следующий день">›</button>
         </div>
         <div class="q" id="rate-q">Как прошёл твой день?</div>
@@ -65,9 +68,9 @@
       </div>
 
       <div class="buttons">
-        <button class="mood green"  data-value="3"><span>🟢</span> Хороший день</button>
-        <button class="mood yellow" data-value="2"><span>🟡</span> Так себе</button>
-        <button class="mood red"    data-value="1"><span>🔴</span> Тяжёлый день</button>
+        <button class="mood green"  data-value="3"><span class="ball"></span> Хороший день</button>
+        <button class="mood yellow" data-value="2"><span class="ball"></span> Так себе</button>
+        <button class="mood red"    data-value="1"><span class="ball"></span> Тяжёлый день</button>
       </div>
 
       <button id="btn-commit" class="primary hidden">Зафиксировать</button>
