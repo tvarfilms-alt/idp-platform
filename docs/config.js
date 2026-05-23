@@ -10,8 +10,8 @@ const firebaseConfig = {
   messagingSenderId: "371619890934",
   appId: "1:371619890934:web:e0bd96a001be0a6f6b0ed7",
   measurementId: "G-YB96MK0BCE",
-  // Адрес Realtime Database — впишется после её создания (см. README).
-  databaseURL: "REPLACE_DB_URL",
+  // Адрес Realtime Database.
+  databaseURL: "https://svetofor-51b8a-default-rtdb.europe-west1.firebasedatabase.app",
 };
 
 // Публичный VAPID-ключ для web-push (МЕНЯТЬ НЕ НУЖНО).
