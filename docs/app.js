@@ -316,6 +316,24 @@ function renderSettings() {
     refreshNotifState(stateEl, enableBtn);
   };
 
+  // my chart color
+  const colorBox = $("#color-edit", node);
+  colorBox.innerHTML = "";
+  PALETTE.forEach((hex) => {
+    const sw = document.createElement("div");
+    sw.className = "swatch" + (hex === store.colorHex ? " selected" : "");
+    sw.style.background = hex;
+    sw.onclick = async () => {
+      store.colorHex = hex;
+      [...colorBox.children].forEach((c) => c.classList.remove("selected"));
+      sw.classList.add("selected");
+      if (uid && store.pairId) {
+        await update(ref(db, `pairs/${store.pairId}/members/${uid}`), { colorHex: hex });
+      }
+    };
+    colorBox.appendChild(sw);
+  });
+
   // members admin
   const adminBox = $("#members-admin", node);
   adminBox.innerHTML = "";
