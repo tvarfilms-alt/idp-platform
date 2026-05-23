@@ -1,9 +1,11 @@
-// 1) Создай проект на https://console.firebase.google.com
-// 2) Add app -> Web (</>), скопируй конфиг и вставь сюда вместо REPLACE_ME.
-// 3) Включи Authentication -> Anonymous, и Firestore Database.
-// Эти значения публичные (так и задумано у Firebase Web) — секретом является
-// только service account для рассылки push (он хранится в GitHub Secrets).
-export const firebaseConfig = {
+// ============================================================
+//  FIREBASE — вставь сюда настройки своего проекта.
+//  Замени ВЕСЬ блок ниже (от строки "const firebaseConfig = {"
+//  до строки "};") на тот, что даёт Firebase по кнопке Copy
+//  на экране регистрации Web-приложения.
+//  Строку "export { ... }" в самом низу НЕ трогай.
+// ============================================================
+const firebaseConfig = {
   apiKey: "REPLACE_ME",
   authDomain: "REPLACE_ME.firebaseapp.com",
   projectId: "REPLACE_ME",
@@ -12,7 +14,8 @@ export const firebaseConfig = {
   appId: "REPLACE_ME",
 };
 
-// Публичный VAPID-ключ для web-push (сгенерирован заранее). Парный приватный
-// ключ положи в GitHub Secrets как VAPID_PRIVATE_KEY — см. README.
-export const VAPID_PUBLIC_KEY =
+// Публичный VAPID-ключ для web-push (МЕНЯТЬ НЕ НУЖНО).
+const VAPID_PUBLIC_KEY =
   "BGBR-wgv7RAcMzbe1MwNdbwSeDGJXWCjNOdbwyGTXAQyFmdMNT7eZ1Z61scMy0yQzZh5XZD86EDW2-cxlNrXOX0";
+
+export { firebaseConfig, VAPID_PUBLIC_KEY };
