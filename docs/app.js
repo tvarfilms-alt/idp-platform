@@ -71,6 +71,7 @@ let unsub = [];
 // UI state
 let pending = null;       // selected-but-not-saved mood
 let editing = false;      // re-voting an already saved day
+let selectedDate = todayKey(); // which day we're rating (yyyy-mm-dd)
 let chartDays = 30;       // preset range length
 let customMode = false;
 let chartFrom = null;     // Date (custom)
@@ -102,7 +103,7 @@ async function upsertMember() {
 
 async function submitRating(value) {
   if (!uid || !store.pairId) return;
-  const date = todayKey();
+  const date = selectedDate;
   await set(ref(db, `pairs/${store.pairId}/ratings/${date}_${uid}`), {
     uid, name: store.name, date, value, updatedAt: serverTimestamp(),
   });
@@ -119,7 +120,17 @@ async function deleteMember(memberUid) {
   if (memberUid === uid) await remove(ref(db, `pushSubs/${uid}`)).catch(() => {});
 }
 
-const myToday = () => ratings.find((r) => r.uid === uid && r.date === todayKey());
+const ratingFor = (u, date) => ratings.find((r) => r.uid === u && r.date === date);
+const mySelected = () => ratingFor(uid, selectedDate);
+const fmtShort = (dateStr) => {
+  const [y, m, d] = dateStr.split("-");
+  return `${d}.${m}`;
+};
+const shiftDate = (dateStr, days) => {
+  const d = parseDateInput(dateStr);
+  d.setDate(d.getDate() + days);
+  return dayKeyOf(d);
+};
 
 // ---------- screens ----------
 
@@ -170,7 +181,7 @@ function renderOnboarding() {
 let _lastMainHash = "";
 function renderMain() {
   const hash = JSON.stringify({
-    r: ratings, m: members, n: notifHint(), e: editing, p: pending,
+    r: ratings, m: members, n: notifHint(), e: editing, p: pending, sd: selectedDate,
     cd: chartDays, cm: customMode,
     cf: chartFrom ? chartFrom.getTime() : 0, ct: chartTo ? chartTo.getTime() : 0,
   });
@@ -186,7 +197,32 @@ function renderMain() {
   if (hint) { banner.classList.remove("hidden"); banner.textContent = hint; }
   else banner.classList.add("hidden");
 
-  const mine = myToday();
+  // date selector
+  const isToday = selectedDate === todayKey();
+  const dateIn = $("#rate-date", node);
+  dateIn.max = todayKey();
+  dateIn.value = selectedDate;
+  dateIn.onchange = () => {
+    let v = dateIn.value || todayKey();
+    if (v > todayKey()) v = todayKey();
+    selectedDate = v; pending = null; editing = false;
+    renderMain();
+  };
+  const goDate = (delta) => {
+    const next = shiftDate(selectedDate, delta);
+    if (next > todayKey()) return;
+    selectedDate = next; pending = null; editing = false;
+    renderMain();
+  };
+  $("#date-prev", node).onclick = () => goDate(-1);
+  const nextBtn = $("#date-next", node);
+  nextBtn.disabled = isToday;
+  nextBtn.onclick = () => goDate(1);
+  $("#rate-q", node).textContent = isToday
+    ? "Как прошёл твой день?"
+    : `Как прошёл день ${fmtShort(selectedDate)}?`;
+
+  const mine = mySelected();
   const locked = !!mine && !editing;
 
   const myStatus = $("#my-status", node);
@@ -229,11 +265,12 @@ function renderMain() {
   const partnersCard = $("#partners", node);
   const list = $("#partners-list", node);
   const others = members.filter((m) => m.uid !== uid);
+  $("#partners-title", node).textContent = isToday ? "Сегодня у вас" : `${fmtShort(selectedDate)} — у вас`;
   if (others.length) {
     partnersCard.classList.remove("hidden");
     list.innerHTML = "";
     others.forEach((m) => {
-      const r = ratings.find((x) => x.uid === m.uid && x.date === todayKey());
+      const r = ratingFor(m.uid, selectedDate);
       const row = document.createElement("div");
       row.className = "partner";
       const status = r

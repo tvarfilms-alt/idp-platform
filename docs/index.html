@@ -55,7 +55,12 @@
       <div id="notif-banner" class="banner hidden"></div>
 
       <div class="today-status">
-        <div class="q">Как прошёл твой день?</div>
+        <div class="date-row">
+          <button id="date-prev" class="date-nav" aria-label="Предыдущий день">‹</button>
+          <input type="date" id="rate-date" />
+          <button id="date-next" class="date-nav" aria-label="Следующий день">›</button>
+        </div>
+        <div class="q" id="rate-q">Как прошёл твой день?</div>
         <div id="my-status" class="my-status muted">Ещё не оценён</div>
       </div>
 
@@ -69,7 +74,7 @@
       <button id="btn-revote" class="secondary hidden">Переголосовать</button>
 
       <section id="partners" class="card hidden">
-        <h2>Сегодня у вас</h2>
+        <h2 id="partners-title">Сегодня у вас</h2>
         <div id="partners-list"></div>
       </section>
 
