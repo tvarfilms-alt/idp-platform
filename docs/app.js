@@ -442,59 +442,72 @@ function buildDayList() {
 function renderChart(container) {
   const dayList = buildDayList();
   const dayKeys = dayList.map(dayKeyOf);
-  const keySet = new Set(dayKeys);
-  const recent = ratings.filter((r) => keySet.has(r.date));
 
-  if (!recent.length) {
-    container.innerHTML = `<div class="chart-empty">Нет оценок за выбранный период.</div>`;
+  if (!members.length) {
+    container.innerHTML = `<div class="chart-empty">Пока нет участников.</div>`;
+    container.onclick = null;
     return;
   }
 
-  const people = [...new Set(recent.map((r) => r.uid))];
-  const colorFor = (p) => (members.find((m) => m.uid === p)?.colorHex) || "#4f8dfd";
-  const nameFor = (p) => (members.find((m) => m.uid === p)?.name) || p.slice(0, 4);
+  const ordered = [...members].sort((a, b) =>
+    a.uid === uid ? -1 : b.uid === uid ? 1 : 0);
 
-  const W = 560, H = 240, padL = 34, padR = 14, padT = 16, padB = 28;
-  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const W = 560;
+  const topPad = 6, labelH = 18, rowH = 22, rowGap = 12, axisH = 20;
+  const perMember = labelH + rowH + rowGap;
+  const H = topPad + ordered.length * perMember + axisH;
+
   const n = dayList.length;
-  const xAt = (i) => padL + (n <= 1 ? plotW / 2 : (plotW * i) / (n - 1));
-  const yAt = (v) => padT + plotH - ((v - 1) / 2) * plotH;
-  const dotR = n > 120 ? 2.5 : n > 60 ? 3.5 : n > 31 ? 5 : 6;
+  const cellW = W / n;
+  const g = cellW > 8 ? 2 : cellW > 4 ? 0.8 : 0.2;
+  const rectW = Math.max(0.6, cellW - g);
+  const rx = Math.min(4, Math.max(0, cellW / 3 - 0.4));
+  const today = todayKey();
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
-  [1, 2, 3].forEach((v) => {
-    const y = yAt(v);
-    svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#2a2d36" stroke-width="1"/>`;
-    svg += `<text x="6" y="${y + 5}" font-size="15">${MOOD[v].emoji}</text>`;
+
+  ordered.forEach((m, k) => {
+    const baseY = topPad + k * perMember;
+    const stripY = baseY + labelH;
+    // row label: color dot + name
+    svg += `<circle cx="7" cy="${baseY + 9}" r="5" fill="${m.colorHex || "#4f8dfd"}"/>`;
+    svg += `<text x="18" y="${baseY + 13}" font-size="12" font-weight="600" fill="#f4f5f7">${escapeHtml(m.name || "—")}</text>`;
+    dayKeys.forEach((key, i) => {
+      const r = ratingFor(m.uid, key);
+      const x = (i * cellW + g / 2).toFixed(2);
+      const fill = r ? MOOD[r.value].color : "#1b1e27";
+      svg += `<rect x="${x}" y="${stripY}" width="${rectW.toFixed(2)}" height="${rowH}" rx="${rx.toFixed(1)}" fill="${fill}"/>`;
+    });
   });
 
+  // bottom date axis
   const step = Math.max(1, Math.ceil(n / 6));
   dayList.forEach((d, i) => {
     if (i % step !== 0 && i !== n - 1) return;
     const label = `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
-    svg += `<text x="${xAt(i)}" y="${H - 8}" font-size="10" fill="#9aa0aa" text-anchor="middle">${label}</text>`;
+    svg += `<text x="${(i * cellW + cellW / 2).toFixed(1)}" y="${H - 6}" font-size="10" fill="#8b919e" text-anchor="middle">${label}</text>`;
   });
 
-  people.forEach((p) => {
-    const pts = [];
-    dayKeys.forEach((k, i) => {
-      const r = recent.find((x) => x.uid === p && x.date === k);
-      if (r) pts.push({ x: xAt(i), y: yAt(r.value), v: r.value });
-    });
-    if (pts.length > 1) {
-      const dAttr = pts.map((pt, i) => (i ? "L" : "M") + pt.x.toFixed(1) + " " + pt.y.toFixed(1)).join(" ");
-      svg += `<path d="${dAttr}" fill="none" stroke="${colorFor(p)}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-    }
-    pts.forEach((pt) => {
-      svg += `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${dotR}" fill="${MOOD[pt.v].color}" stroke="#0e0f13" stroke-width="2"/>`;
-    });
+  // transparent per-day hit columns (tap a day to select it); outline today/selected
+  const colTop = topPad, colH = ordered.length * perMember;
+  dayKeys.forEach((key, i) => {
+    const x = (i * cellW).toFixed(2);
+    let stroke = "none", sw = 0;
+    if (key === selectedDate) { stroke = "#5b8cff"; sw = 1.5; }
+    else if (key === today) { stroke = "#ffffff"; sw = 0.8; }
+    svg += `<rect x="${x}" y="${colTop}" width="${cellW.toFixed(2)}" height="${colH}" fill="transparent" ` +
+      `${sw ? `stroke="${stroke}" stroke-opacity="0.7" stroke-width="${sw}" rx="3"` : ""} data-date="${key}"/>`;
   });
+
   svg += `</svg>`;
+  container.innerHTML = svg;
 
-  const legend = people.map((p) =>
-    `<span class="item"><span class="dot" style="background:${colorFor(p)}"></span>${escapeHtml(nameFor(p))}</span>`
-  ).join("");
-  container.innerHTML = svg + `<div class="legend">${legend}</div>`;
+  container.onclick = (e) => {
+    const el = e.target.closest && e.target.closest("[data-date]");
+    if (!el) return;
+    const d = el.getAttribute("data-date");
+    if (d && d <= today) { selectedDate = d; pending = null; editing = false; renderMain(); }
+  };
 }
 
 // ---------- notifications (web push) ----------
