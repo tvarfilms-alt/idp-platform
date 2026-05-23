@@ -72,7 +72,7 @@ let unsub = [];
 let pending = null;       // selected-but-not-saved mood
 let editing = false;      // re-voting an already saved day
 let selectedDate = todayKey(); // which day we're rating (yyyy-mm-dd)
-let chartDays = 30;       // preset range length
+let chartDays = 7;        // preset range length
 let customMode = false;
 let chartFrom = null;     // Date (custom)
 let chartTo = null;       // Date (custom)
@@ -122,6 +122,40 @@ async function deleteMember(memberUid) {
 
 const ratingFor = (u, date) => ratings.find((r) => r.uid === u && r.date === date);
 const mySelected = () => ratingFor(uid, selectedDate);
+
+function pluralDays(n) {
+  const a = Math.abs(n) % 100, b = n % 10;
+  if (a > 10 && a < 20) return "дней";
+  if (b === 1) return "день";
+  if (b >= 2 && b <= 4) return "дня";
+  return "дней";
+}
+
+// Consecutive days (ending today) where I have a rating; if today isn't rated
+// yet, the streak counts up to yesterday so it isn't reset to 0 prematurely.
+function myStreak() {
+  if (!uid) return 0;
+  let count = 0, guard = 0;
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  if (!ratingFor(uid, dayKeyOf(d))) d.setDate(d.getDate() - 1);
+  while (ratingFor(uid, dayKeyOf(d)) && guard < 3000) { count++; d.setDate(d.getDate() - 1); guard++; }
+  return count;
+}
+
+function renderSummary(el) {
+  const ordered = [...members].sort((a, b) => (a.uid === uid ? -1 : b.uid === uid ? 1 : 0));
+  el.innerHTML = ordered.map((m) => {
+    const r = ratingFor(m.uid, selectedDate);
+    const moodColor = r ? MOOD[r.value].color : "#2a2e3a";
+    const label = m.uid === uid ? "Ты" : escapeHtml(m.name || "—");
+    const word = r ? MOOD[r.value].title : "нет оценки";
+    return `<div class="sum-item">
+      <div class="sum-circle" style="background:${moodColor};box-shadow:0 0 0 2px ${m.colorHex || "#4f8dfd"}"></div>
+      <div class="sum-name">${label}</div>
+      <div class="sum-word ${r ? "" : "muted"}">${word}</div>
+    </div>`;
+  }).join("");
+}
 const fmtShort = (dateStr) => {
   const [, m, d] = dateStr.split("-");
   return `${d}.${m}`;
@@ -228,19 +262,21 @@ function renderMain() {
     isToday ? "Сегодня" : isYesterday ? "Вчера" : ruDate(selectedDate);
   $("#rate-q", node).textContent = isToday
     ? "Как прошёл твой день?"
-    : `Как прошёл этот день?`;
+    : "Как прошёл этот день?";
+
+  const backToday = $("#back-today", node);
+  backToday.classList.toggle("hidden", isToday);
+  backToday.onclick = () => { selectedDate = todayKey(); pending = null; editing = false; renderMain(); };
+
+  const streakEl = $("#streak", node);
+  const s = myStreak();
+  if (s > 0) { streakEl.classList.remove("hidden"); streakEl.textContent = `🔥 ${s} ${pluralDays(s)} подряд`; }
+  else streakEl.classList.add("hidden");
+
+  renderSummary($("#summary", node));
 
   const mine = mySelected();
   const locked = !!mine && !editing;
-
-  const myStatus = $("#my-status", node);
-  if (mine) {
-    myStatus.textContent = `${MOOD[mine.value].emoji}  ${MOOD[mine.value].title}`;
-    myStatus.style.color = MOOD[mine.value].color;
-  } else {
-    myStatus.textContent = "Ещё не оценён";
-    myStatus.style.color = "";
-  }
 
   node.querySelectorAll(".mood").forEach((btn) => {
     const value = Number(btn.dataset.value);
@@ -268,29 +304,6 @@ function renderMain() {
     renderMain();
   };
   revoteBtn.onclick = () => { editing = true; pending = mine.value; renderMain(); };
-
-  // partners
-  const partnersCard = $("#partners", node);
-  const list = $("#partners-list", node);
-  const others = members.filter((m) => m.uid !== uid);
-  $("#partners-title", node).textContent = isToday ? "Сегодня у вас" : `${ruDate(selectedDate)} — у вас`;
-  if (others.length) {
-    partnersCard.classList.remove("hidden");
-    list.innerHTML = "";
-    others.forEach((m) => {
-      const r = ratingFor(m.uid, selectedDate);
-      const row = document.createElement("div");
-      row.className = "partner";
-      const status = r
-        ? `<span style="color:${MOOD[r.value].color}">${MOOD[r.value].emoji} ${MOOD[r.value].title}</span>`
-        : `<span class="muted">ещё не оценил(а)</span>`;
-      row.innerHTML = `<span class="dot" style="background:${m.colorHex}"></span>
-        <span class="name">${escapeHtml(m.name)}</span> ${status}`;
-      list.appendChild(row);
-    });
-  } else {
-    partnersCard.classList.add("hidden");
-  }
 
   // chart range chips
   node.querySelectorAll("#chart-range button").forEach((b) => {
@@ -452,12 +465,18 @@ function renderChart(container) {
   const ordered = [...members].sort((a, b) =>
     a.uid === uid ? -1 : b.uid === uid ? 1 : 0);
 
-  const W = 560;
-  const topPad = 6, labelH = 18, rowH = 22, rowGap = 12, axisH = 20;
-  const perMember = labelH + rowH + rowGap;
-  const H = topPad + ordered.length * perMember + axisH;
-
   const n = dayList.length;
+  const showWeekdays = n <= 14;
+  const WD = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+
+  const W = 560;
+  const topPad = 6;
+  const wkH = showWeekdays ? 16 : 0;
+  const labelH = 18, rowH = 22, rowGap = 12, axisH = 20;
+  const perMember = labelH + rowH + rowGap;
+  const gridTop = topPad + wkH;
+  const H = gridTop + ordered.length * perMember + axisH;
+
   const cellW = W / n;
   const g = cellW > 8 ? 2 : cellW > 4 ? 0.8 : 0.2;
   const rectW = Math.max(0.6, cellW - g);
@@ -466,8 +485,15 @@ function renderChart(container) {
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
 
+  // weekday labels (only for short ranges)
+  if (showWeekdays) {
+    dayList.forEach((d, i) => {
+      svg += `<text x="${(i * cellW + cellW / 2).toFixed(1)}" y="${topPad + 11}" font-size="9" fill="#8b919e" text-anchor="middle">${WD[d.getDay()]}</text>`;
+    });
+  }
+
   ordered.forEach((m, k) => {
-    const baseY = topPad + k * perMember;
+    const baseY = gridTop + k * perMember;
     const stripY = baseY + labelH;
     // row label: color dot + name
     svg += `<circle cx="7" cy="${baseY + 9}" r="5" fill="${m.colorHex || "#4f8dfd"}"/>`;
@@ -475,7 +501,7 @@ function renderChart(container) {
     dayKeys.forEach((key, i) => {
       const r = ratingFor(m.uid, key);
       const x = (i * cellW + g / 2).toFixed(2);
-      const fill = r ? MOOD[r.value].color : "#1b1e27";
+      const fill = r ? MOOD[r.value].color : "rgba(255,255,255,0.045)";
       svg += `<rect x="${x}" y="${stripY}" width="${rectW.toFixed(2)}" height="${rowH}" rx="${rx.toFixed(1)}" fill="${fill}"/>`;
     });
   });
@@ -489,7 +515,7 @@ function renderChart(container) {
   });
 
   // transparent per-day hit columns (tap a day to select it); outline today/selected
-  const colTop = topPad, colH = ordered.length * perMember;
+  const colTop = gridTop, colH = ordered.length * perMember;
   dayKeys.forEach((key, i) => {
     const x = (i * cellW).toFixed(2);
     let stroke = "none", sw = 0;

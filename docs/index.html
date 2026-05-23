@@ -63,23 +63,20 @@
           </span>
           <button id="date-next" class="date-nav" aria-label="Следующий день">›</button>
         </div>
+        <button id="back-today" class="link-today hidden">↩ Вернуться к сегодня</button>
+        <div id="streak" class="streak hidden"></div>
+        <div id="summary" class="summary"></div>
         <div class="q" id="rate-q">Как прошёл твой день?</div>
-        <div id="my-status" class="my-status muted">Ещё не оценён</div>
       </div>
 
       <div class="buttons">
-        <button class="mood green"  data-value="3"><span class="ball"></span> Хороший день</button>
-        <button class="mood yellow" data-value="2"><span class="ball"></span> Так себе</button>
-        <button class="mood red"    data-value="1"><span class="ball"></span> Тяжёлый день</button>
+        <button class="mood green"  data-value="3"><span class="ball"></span><span class="lbl">Хороший день</span><span class="check">✓</span></button>
+        <button class="mood yellow" data-value="2"><span class="ball"></span><span class="lbl">Так себе</span><span class="check">✓</span></button>
+        <button class="mood red"    data-value="1"><span class="ball"></span><span class="lbl">Тяжёлый день</span><span class="check">✓</span></button>
       </div>
 
       <button id="btn-commit" class="primary hidden">Зафиксировать</button>
       <button id="btn-revote" class="secondary hidden">Переголосовать</button>
-
-      <section id="partners" class="card hidden">
-        <h2 id="partners-title">Сегодня у вас</h2>
-        <div id="partners-list"></div>
-      </section>
 
       <section class="card">
         <h2>История настроения</h2>
