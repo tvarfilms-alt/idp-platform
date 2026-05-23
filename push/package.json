@@ -1,0 +1,14 @@
+{
+  "name": "svetofor-push",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily web-push sender for the Светофор PWA",
+  "type": "commonjs",
+  "scripts": {
+    "send": "node send.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "web-push": "^3.6.7"
+  }
+}

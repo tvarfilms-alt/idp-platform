@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Светофор настроения</title>
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0e0f13" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Светофор" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <div class="loading">Загрузка…</div>
+  </div>
+
+  <!-- Onboarding -->
+  <template id="tpl-onboarding">
+    <div class="screen onboarding">
+      <div class="hero">
+        <div class="logo">🚦</div>
+        <h1>Светофор настроения</h1>
+        <p class="muted">Каждый день оценивайте, как он прошёл — 🔴 🟡 🟢 — и видьте настроение друг друга в реальном времени.</p>
+      </div>
+      <label class="field">
+        <span>Как вас зовут</span>
+        <input id="in-name" type="text" placeholder="Имя" autocomplete="off" />
+      </label>
+      <div class="field">
+        <span>Ваш цвет на графике</span>
+        <div id="color-row" class="color-row"></div>
+      </div>
+      <label class="field">
+        <span>Код пары</span>
+        <input id="in-pair" type="text" placeholder="например: olya-sasha" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <small class="muted">Придумайте общий код и введите одинаковый на обоих телефонах — так приложение свяжет вас.</small>
+      </label>
+      <button id="btn-start" class="primary" disabled>Начать</button>
+    </div>
+  </template>
+
+  <!-- Main -->
+  <template id="tpl-main">
+    <div class="screen main">
+      <header class="topbar">
+        <div class="title">Сегодня</div>
+        <button id="btn-settings" class="icon-btn" aria-label="Настройки">⚙️</button>
+      </header>
+
+      <div id="notif-banner" class="banner hidden"></div>
+
+      <div class="today-status">
+        <div class="q">Как прошёл твой день?</div>
+        <div id="my-status" class="my-status muted">Ещё не оценён</div>
+      </div>
+
+      <div class="buttons">
+        <button class="mood green"  data-value="3"><span>🟢</span> Хороший день</button>
+        <button class="mood yellow" data-value="2"><span>🟡</span> Так себе</button>
+        <button class="mood red"    data-value="1"><span>🔴</span> Тяжёлый день</button>
+      </div>
+
+      <section id="partners" class="card hidden">
+        <h2>Сегодня у вас</h2>
+        <div id="partners-list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Последние 2 недели</h2>
+        <div id="chart"></div>
+      </section>
+    </div>
+  </template>
+
+  <!-- Settings -->
+  <template id="tpl-settings">
+    <div class="screen settings">
+      <header class="topbar">
+        <button id="btn-back" class="icon-btn" aria-label="Назад">‹</button>
+        <div class="title">Настройки</div>
+        <span style="width:2.4rem"></span>
+      </header>
+      <section class="card">
+        <div class="row"><span class="muted">Имя</span><span id="set-name"></span></div>
+        <div class="row"><span class="muted">Код пары</span><span id="set-pair"></span></div>
+      </section>
+      <section class="card">
+        <h2>Напоминание</h2>
+        <p class="muted">Push приходит каждый день автоматически (его рассылает сервер по расписанию). Время меняется в настройках проекта — см. README.</p>
+        <div id="notif-state" class="muted"></div>
+        <button id="btn-enable-notif" class="primary">Включить напоминания</button>
+      </section>
+      <button id="btn-reset" class="danger">Сбросить и выйти</button>
+    </div>
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

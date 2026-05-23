@@ -1,0 +1,35 @@
+name: Daily mood push
+
+# ВАЖНО: запланированные (schedule) workflow в GitHub запускаются ТОЛЬКО из
+# файла на ветке по умолчанию (обычно master/main). Пока этот файл живёт только
+# на feature-ветке, авто-отправка не сработает — смотри README, как активировать.
+on:
+  schedule:
+    # Время в UTC. 18:00 UTC = 21:00 по Москве (UTC+3).
+    # Поменяй на своё: например для 21:00 Киев (летом UTC+3) тоже 18:00.
+    - cron: "0 18 * * *"
+  workflow_dispatch: {}   # позволяет запустить вручную кнопкой для проверки
+
+concurrency:
+  group: daily-push
+  cancel-in-progress: false
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        working-directory: push
+        run: npm install --no-audit --no-fund
+      - name: Send push
+        working-directory: push
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+        run: node send.js
