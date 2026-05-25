@@ -43,8 +43,8 @@
   "l2": {
     "current": {
       "date": "2026-05-22",
-      "regime": "Neutral",
-      "multiplier": 1.0,
+      "regime": "Risk-on",
+      "multiplier": 1.2,
       "wms": 3.0
     },
     "scores": {
@@ -56,9 +56,9 @@
     "history": [
       {
         "date": "2026-05-22",
-        "regime": "Neutral",
+        "regime": "Risk-on",
         "wms": 3.0,
-        "multiplier": 1.0
+        "multiplier": 1.2
       },
       {
         "date": "2026-05-21",
@@ -1203,7 +1203,7 @@
     }
   ],
   "bonds": {
-    "date": "2026-05-22",
+    "date": "2026-05-25",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
@@ -1225,7 +1225,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-05-22",
+    "updated_at": "2026-05-25",
     "calc_versions": {
       "L1": {
         "id": 1,
