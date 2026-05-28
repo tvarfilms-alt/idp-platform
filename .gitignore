@@ -47,3 +47,7 @@ backups/
 # OS
 .DS_Store
 Thumbs.db
+
+# Node (push sender deps, installed in CI)
+node_modules/
+push/package-lock.json

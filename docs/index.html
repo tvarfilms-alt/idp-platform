@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Светофор настроения</title>
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0e0f13" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Светофор" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <div class="loading">Загрузка…</div>
+  </div>
+
+  <!-- Onboarding -->
+  <template id="tpl-onboarding">
+    <div class="screen onboarding">
+      <div class="hero">
+        <div class="logo">🚦</div>
+        <h1>Светофор настроения</h1>
+        <p class="muted">Каждый день оценивайте, как он прошёл — 🔴 🟡 🟢 — и видьте настроение друг друга в реальном времени.</p>
+      </div>
+      <label class="field">
+        <span>Как вас зовут</span>
+        <input id="in-name" type="text" placeholder="Имя" autocomplete="off" />
+      </label>
+      <div class="field">
+        <span>Ваш цвет на графике</span>
+        <div id="color-row" class="color-row"></div>
+      </div>
+      <label class="field">
+        <span>Код пары</span>
+        <input id="in-pair" type="text" placeholder="например: olya-sasha" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <small class="muted">Придумайте общий код и введите одинаковый на обоих телефонах — так приложение свяжет вас.</small>
+      </label>
+      <button id="btn-start" class="primary" disabled>Начать</button>
+    </div>
+  </template>
+
+  <!-- Main -->
+  <template id="tpl-main">
+    <div class="screen main">
+      <header class="topbar">
+        <div class="title">🚦 Светофор</div>
+        <button id="btn-settings" class="icon-btn" aria-label="Настройки">⚙️</button>
+      </header>
+
+      <div id="notif-banner" class="banner hidden"></div>
+
+      <div class="today-status">
+        <div class="date-row">
+          <button id="date-prev" class="date-nav" aria-label="Предыдущий день">‹</button>
+          <span class="date-pill-wrap">
+            <span id="date-label" class="date-pill">Сегодня</span>
+            <input type="date" id="rate-date" aria-label="Выбрать дату" />
+          </span>
+          <button id="date-next" class="date-nav" aria-label="Следующий день">›</button>
+        </div>
+        <button id="back-today" class="link-today hidden">↩ Вернуться к сегодня</button>
+        <div id="streak" class="streak hidden"></div>
+        <div id="summary" class="summary"></div>
+        <div class="q" id="rate-q">Как прошёл твой день?</div>
+      </div>
+
+      <div class="buttons">
+        <button class="mood green"  data-value="3"><span class="ball"></span><span class="lbl">Хороший день</span><span class="check">✓</span></button>
+        <button class="mood yellow" data-value="2"><span class="ball"></span><span class="lbl">Так себе</span><span class="check">✓</span></button>
+        <button class="mood red"    data-value="1"><span class="ball"></span><span class="lbl">Тяжёлый день</span><span class="check">✓</span></button>
+      </div>
+
+      <button id="btn-commit" class="primary hidden">Зафиксировать</button>
+      <button id="btn-revote" class="secondary hidden">Переголосовать</button>
+
+      <section class="card">
+        <h2>История настроения</h2>
+        <div id="chart-range" class="chips">
+          <button data-days="7">Неделя</button>
+          <button data-days="30">Месяц</button>
+          <button data-days="90">3 мес</button>
+          <button data-days="180">6 мес</button>
+          <button data-days="365">Год</button>
+          <button data-custom="1">Свои даты</button>
+        </div>
+        <div id="custom-range" class="custom-range hidden">
+          <input type="date" id="range-from" />
+          <span>—</span>
+          <input type="date" id="range-to" />
+        </div>
+        <div id="chart"></div>
+      </section>
+    </div>
+  </template>
+
+  <!-- Settings -->
+  <template id="tpl-settings">
+    <div class="screen settings">
+      <header class="topbar">
+        <button id="btn-back" class="icon-btn" aria-label="Назад">‹</button>
+        <div class="title">Настройки</div>
+        <span style="width:2.4rem"></span>
+      </header>
+
+      <section class="card">
+        <div class="row"><span class="muted">Имя</span><span id="set-name"></span></div>
+        <div class="row"><span class="muted">Код пары</span><span id="set-pair"></span></div>
+      </section>
+
+      <section class="card">
+        <h2>Напоминание</h2>
+        <p class="muted">Каждый день в это время придёт push «оцени день». Время у каждого своё.</p>
+        <label class="row">
+          <span>Время напоминания</span>
+          <input type="time" id="notif-time" />
+        </label>
+        <div id="notif-state" class="muted" style="margin:.6rem 0"></div>
+        <button id="btn-enable-notif" class="primary">Включить напоминания</button>
+      </section>
+
+      <section class="card">
+        <h2>Мой цвет на графике</h2>
+        <div id="color-edit" class="color-row"></div>
+      </section>
+
+      <section class="card">
+        <h2>Участники</h2>
+        <p class="muted">Лишний или случайный аккаунт можно удалить (вместе с его оценками).</p>
+        <div id="members-admin"></div>
+      </section>
+
+      <button id="btn-reset" class="danger">Выйти на этом устройстве</button>
+    </div>
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
