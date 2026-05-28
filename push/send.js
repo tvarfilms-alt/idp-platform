@@ -1,33 +1,39 @@
 // Sends each user their "rate your day" web-push at THEIR chosen local time.
-// Run by .github/workflows/daily-push.yml every 15 minutes; for each stored
-// subscription it checks whether the user's reminder time (in their timezone)
-// just passed, and sends once per day (deduped via lastSent).
+// Run by .github/workflows/daily-push.yml every 15 minutes.
 //
-// Required env vars (set as GitHub Secrets):
+// Non-secret values are hardcoded below (public VAPID key, DB URL, subject —
+// all already public via the web app). Only two SECRETS are read from env and
+// must be set in repo Settings → Secrets and variables → Actions:
+//   VAPID_PRIVATE_KEY         - matching private key for the public key below
 //   FIREBASE_SERVICE_ACCOUNT  - full service-account JSON (one line)
-//   FIREBASE_DB_URL           - Realtime Database URL (https://...firebasedatabase.app)
-//   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT
 
 const admin = require("firebase-admin");
 const webpush = require("web-push");
 
-function requireEnv(name) {
-  const v = process.env[name];
-  if (!v) { console.error(`Missing env ${name}`); process.exit(1); }
-  return v;
+// --- public (non-secret) config ---
+const VAPID_PUBLIC_KEY = "BGBR-wgv7RAcMzbe1MwNdbwSeDGJXWCjNOdbwyGTXAQyFmdMNT7eZ1Z61scMy0yQzZh5XZD86EDW2-cxlNrXOX0";
+const VAPID_SUBJECT = "https://tvarfilms-alt.github.io/idp-platform/";
+const FIREBASE_DB_URL = "https://svetofor-51b8a-default-rtdb.europe-west1.firebasedatabase.app";
+
+// --- secrets (from env) ---
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+const SERVICE_ACCOUNT_RAW = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+if (!VAPID_PRIVATE_KEY || !SERVICE_ACCOUNT_RAW) {
+  console.log(
+    "Секреты ещё не заданы (VAPID_PRIVATE_KEY / FIREBASE_SERVICE_ACCOUNT). " +
+    "Добавь их в Settings → Secrets and variables → Actions. Пропускаю запуск."
+  );
+  process.exit(0); // graceful: no red failures until secrets exist
 }
 
 admin.initializeApp({
-  credential: admin.credential.cert(JSON.parse(requireEnv("FIREBASE_SERVICE_ACCOUNT"))),
-  databaseURL: requireEnv("FIREBASE_DB_URL"),
+  credential: admin.credential.cert(JSON.parse(SERVICE_ACCOUNT_RAW)),
+  databaseURL: FIREBASE_DB_URL,
 });
 const db = admin.database();
 
-webpush.setVapidDetails(
-  requireEnv("VAPID_SUBJECT"),
-  requireEnv("VAPID_PUBLIC_KEY"),
-  requireEnv("VAPID_PRIVATE_KEY")
-);
+webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 const payload = JSON.stringify({
   title: "Как прошёл день?",
@@ -35,8 +41,7 @@ const payload = JSON.stringify({
   url: ".",
 });
 
-// How long after the target time we still consider a reminder "due".
-// 30 min window with a 15-min cron survives an occasionally-skipped run.
+// 30-min window with a 15-min cron survives an occasionally-skipped run.
 const WINDOW_MIN = 30;
 
 // Returns { mod, dateStr } = minutes-since-midnight and Y-M-D in the given tz.
@@ -47,7 +52,7 @@ function wallClock(tz) {
     hour: "2-digit", minute: "2-digit",
   });
   const p = Object.fromEntries(fmt.formatToParts(new Date()).map((x) => [x.type, x.value]));
-  const hour = Number(p.hour) % 24; // guard against "24" at midnight
+  const hour = Number(p.hour) % 24;
   return { mod: hour * 60 + Number(p.minute), dateStr: `${p.year}-${p.month}-${p.day}` };
 }
 
@@ -68,8 +73,7 @@ function wallClock(tz) {
     catch (_) { now = wallClock("UTC"); }
 
     const diff = now.mod - (hour * 60 + minute);
-    const due = diff >= 0 && diff < WINDOW_MIN;
-    if (!due) { skipped++; continue; }
+    if (!(diff >= 0 && diff < WINDOW_MIN)) { skipped++; continue; }
     if (rec.lastSent === now.dateStr) { skipped++; continue; }
 
     try {

@@ -30,8 +30,5 @@ jobs:
         working-directory: push
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
-          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
-          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
         run: node send.js
