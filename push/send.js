@@ -62,23 +62,34 @@ function wallClock(tz) {
   let ok = 0, removed = 0, skipped = 0, failed = 0;
 
   for (const [key, rec] of Object.entries(subs)) {
-    if (!rec || !rec.enabled || !rec.subscription || !rec.subscription.endpoint) { skipped++; continue; }
-
-    const tz = rec.tz || "UTC";
-    const hour = Number.isInteger(rec.hour) ? rec.hour : 21;
-    const minute = Number.isInteger(rec.minute) ? rec.minute : 0;
-
+    const tz = (rec && rec.tz) || "UTC";
     let now;
     try { now = wallClock(tz); }
     catch (_) { now = wallClock("UTC"); }
 
-    const diff = now.mod - (hour * 60 + minute);
-    if (!(diff >= 0 && diff < WINDOW_MIN)) { skipped++; continue; }
-    if (rec.lastSent === now.dateStr) { skipped++; continue; }
+    if (!rec || !rec.enabled || !rec.subscription || !rec.subscription.endpoint) {
+      console.log(`[skip] ${key.slice(0,8)} name=${rec && rec.name} enabled=${rec && rec.enabled} hasSub=${!!(rec && rec.subscription && rec.subscription.endpoint)} reason=not-enabled-or-no-sub`);
+      skipped++; continue;
+    }
+
+    const hour = Number.isInteger(rec.hour) ? rec.hour : 21;
+    const minute = Number.isInteger(rec.minute) ? rec.minute : 0;
+    const target = hour * 60 + minute;
+    const diff = now.mod - target;
+
+    if (!(diff >= 0 && diff < WINDOW_MIN)) {
+      console.log(`[skip] ${key.slice(0,8)} name=${rec.name} tz=${tz} target=${hour}:${String(minute).padStart(2,"0")} nowMin=${now.mod} diff=${diff} reason=outside-window(0..${WINDOW_MIN})`);
+      skipped++; continue;
+    }
+    if (rec.lastSent === now.dateStr) {
+      console.log(`[skip] ${key.slice(0,8)} name=${rec.name} reason=already-sent-today`);
+      skipped++; continue;
+    }
 
     try {
       await webpush.sendNotification(rec.subscription, payload);
       await db.ref(`pushSubs/${key}/lastSent`).set(now.dateStr);
+      console.log(`[sent] ${key.slice(0,8)} name=${rec.name} tz=${tz}`);
       ok++;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 410) {
