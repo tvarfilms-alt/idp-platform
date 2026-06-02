@@ -67,8 +67,12 @@ function wallClock(tz) {
     try { now = wallClock(tz); }
     catch (_) { now = wallClock("UTC"); }
 
-    if (!rec || !rec.enabled || !rec.subscription || !rec.subscription.endpoint) {
-      console.log(`[skip] ${key.slice(0,8)} name=${rec && rec.name} enabled=${rec && rec.enabled} hasSub=${!!(rec && rec.subscription && rec.subscription.endpoint)} reason=not-enabled-or-no-sub`);
+    if (!rec || !rec.subscription || !rec.subscription.endpoint) {
+      console.log(`[skip] ${key.slice(0,8)} name=${rec && rec.name} reason=no-subscription`);
+      skipped++; continue;
+    }
+    if (rec.enabled === false) {
+      console.log(`[skip] ${key.slice(0,8)} name=${rec.name} reason=disabled-by-user`);
       skipped++; continue;
     }
 
