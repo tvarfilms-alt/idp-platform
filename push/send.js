@@ -41,8 +41,10 @@ const payload = JSON.stringify({
   url: ".",
 });
 
-// 30-min window with a 15-min cron survives an occasionally-skipped run.
-const WINDOW_MIN = 30;
+// GitHub Actions cron is best-effort and can be delayed by hours under load,
+// so widen the window: deliver any time within 4 hours after the user's target.
+// Dedupe via lastSent ensures one push per day, even if multiple runs match.
+const WINDOW_MIN = 240;
 
 // Returns { mod, dateStr } = minutes-since-midnight and Y-M-D in the given tz.
 function wallClock(tz) {
