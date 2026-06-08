@@ -16,7 +16,7 @@ const PALETTE = [
 
 const MOOD = {
   1: { color: "#e74c3c", emoji: "🔴", title: "Тяжёлый день" },
-  2: { color: "#f5b62e", emoji: "🟡", title: "Так себе" },
+  2: { color: "#f5b62e", emoji: "🟡", title: "Обычный" },
   3: { color: "#2ecc71", emoji: "🟢", title: "Хороший день" },
 };
 
