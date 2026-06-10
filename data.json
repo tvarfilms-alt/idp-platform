@@ -49,18 +49,24 @@
   },
   "l2": {
     "current": {
-      "date": "2026-06-09",
-      "regime": "Neutral",
-      "multiplier": 1.0,
-      "wms": 3.0
+      "date": "2026-06-10",
+      "regime": "Risk-on",
+      "multiplier": 1.2,
+      "wms": 0.0
     },
     "scores": {
       "volatility": 0,
       "credit": 0,
-      "liquidity": 1,
+      "liquidity": 0,
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-06-10",
+        "regime": "Risk-on",
+        "wms": 0.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-06-09",
         "regime": "Neutral",
@@ -1282,14 +1288,14 @@
     }
   ],
   "bonds": {
-    "date": "2026-06-09",
+    "date": "2026-06-10",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 14.5,
-      "ruonia": 14.12,
-      "cpi_yoy": 5.58,
+      "ruonia": 14.05,
+      "cpi_yoy": 5.31,
       "real_yield": null,
       "rgbi_index": null
     },
@@ -1304,7 +1310,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-06-09",
+    "updated_at": "2026-06-10",
     "calc_versions": {
       "L1": {
         "id": 1,
@@ -1325,6 +1331,18 @@
     },
     "last_etl": [
       {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-06-10T19:11:38.257935+00:00",
+        "rows": 50
+      },
+      {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-06-10T19:11:37.757989+00:00",
+        "rows": 4
+      },
+      {
         "source": "CBR",
         "status": "SUCCESS",
         "at": "2026-06-09T18:30:19.429605+00:00",
@@ -1340,18 +1358,6 @@
         "source": "MOEX",
         "status": "SUCCESS",
         "at": "2026-06-08T18:42:26.309303+00:00",
-        "rows": 50
-      },
-      {
-        "source": "CBR",
-        "status": "SUCCESS",
-        "at": "2026-06-08T18:42:26.189346+00:00",
-        "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-06-08T10:04:36.5401+00:00",
         "rows": 50
       }
     ]
