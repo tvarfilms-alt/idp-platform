@@ -56,7 +56,7 @@
   },
   "l2": {
     "current": {
-      "date": "2026-06-30",
+      "date": "2026-07-01",
       "regime": "Risk-on",
       "multiplier": 1.2,
       "wms": 3.0
@@ -68,6 +68,12 @@
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-07-01",
+        "regime": "Risk-on",
+        "wms": 3.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-06-30",
         "regime": "Risk-on",
@@ -1385,7 +1391,7 @@
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 14.25,
-      "ruonia": 14.27,
+      "ruonia": 14.25,
       "cpi_yoy": 5.31,
       "real_yield": null,
       "rgbi_index": null
@@ -1422,6 +1428,18 @@
     },
     "last_etl": [
       {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-07-01T18:25:25.686519+00:00",
+        "rows": 50
+      },
+      {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-07-01T18:25:20.581612+00:00",
+        "rows": 4
+      },
+      {
         "source": "CBR",
         "status": "SUCCESS",
         "at": "2026-06-30T18:19:07.723124+00:00",
@@ -1438,18 +1456,6 @@
         "status": "SUCCESS",
         "at": "2026-06-29T18:28:52.350741+00:00",
         "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-06-29T18:28:51.672204+00:00",
-        "rows": 50
-      },
-      {
-        "source": "MOEX",
-        "status": "FAILED",
-        "at": "2026-06-29T10:08:29.586678+00:00",
-        "rows": 0
       }
     ]
   }
