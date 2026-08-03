@@ -1524,7 +1524,7 @@
     }
   ],
   "bonds": {
-    "date": "2026-08-01",
+    "date": "2026-08-03",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
@@ -1546,7 +1546,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-08-01",
+    "updated_at": "2026-08-03",
     "calc_versions": {
       "L1": {
         "id": 1,
