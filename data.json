@@ -63,18 +63,24 @@
   },
   "l2": {
     "current": {
-      "date": "2026-07-31",
+      "date": "2026-08-03",
       "regime": "Risk-on",
       "multiplier": 1.2,
-      "wms": 0.0
+      "wms": 3.0
     },
     "scores": {
       "volatility": 0,
       "credit": 0,
-      "liquidity": 0,
+      "liquidity": 1,
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-08-03",
+        "regime": "Risk-on",
+        "wms": 3.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-07-31",
         "regime": "Risk-on",
@@ -1529,8 +1535,8 @@
       "gbi_ytm": null,
       "cbi_ytm": null,
       "g_spread": null,
-      "key_rate": 14.25,
-      "ruonia": 13.99,
+      "key_rate": 14.0,
+      "ruonia": 13.95,
       "cpi_yoy": 6.02,
       "real_yield": null,
       "rgbi_index": null
@@ -1541,7 +1547,7 @@
       "credit": "IG",
       "coupon": "Fixed",
       "quality": "Умеренно",
-      "target_ytm": 12.25,
+      "target_ytm": 12.0,
       "bond_alloc_pct": 15
     }
   },
@@ -1569,32 +1575,32 @@
       {
         "source": "CBR",
         "status": "SUCCESS",
-        "at": "2026-07-31T18:03:50.056753+00:00",
+        "at": "2026-08-03T18:16:36.600028+00:00",
         "rows": 4
       },
       {
         "source": "MOEX",
         "status": "SUCCESS",
-        "at": "2026-07-31T18:03:45.0246+00:00",
+        "at": "2026-08-03T18:16:34.890775+00:00",
         "rows": 50
       },
       {
         "source": "MOEX",
         "status": "SUCCESS",
-        "at": "2026-07-30T17:56:44.589585+00:00",
+        "at": "2026-08-03T08:48:02.428034+00:00",
         "rows": 50
+      },
+      {
+        "source": "MOEX",
+        "status": "FAILED",
+        "at": "2026-08-03T08:47:39.5929+00:00",
+        "rows": 0
       },
       {
         "source": "CBR",
         "status": "SUCCESS",
-        "at": "2026-07-30T17:56:34.316467+00:00",
+        "at": "2026-08-03T08:47:34.883632+00:00",
         "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-07-29T17:47:39.588606+00:00",
-        "rows": 50
       }
     ]
   }
