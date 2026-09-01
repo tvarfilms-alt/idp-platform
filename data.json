@@ -70,9 +70,9 @@
   },
   "l2": {
     "current": {
-      "date": "2026-08-31",
-      "regime": "Risk-on",
-      "multiplier": 1.2,
+      "date": "2026-09-01",
+      "regime": "Neutral",
+      "multiplier": 1.0,
       "wms": 3.0
     },
     "scores": {
@@ -82,6 +82,12 @@
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-09-01",
+        "regime": "Neutral",
+        "wms": 3.0,
+        "multiplier": 1.0
+      },
       {
         "date": "2026-08-31",
         "regime": "Risk-on",
@@ -1694,6 +1700,18 @@
     },
     "last_etl": [
       {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-09-01T19:28:13.378958+00:00",
+        "rows": 50
+      },
+      {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-09-01T19:28:13.378157+00:00",
+        "rows": 4
+      },
+      {
         "source": "CBR",
         "status": "SUCCESS",
         "at": "2026-08-31T21:33:09.705648+00:00",
@@ -1710,18 +1728,6 @@
         "status": "SUCCESS",
         "at": "2026-08-31T11:45:08.289107+00:00",
         "rows": 50
-      },
-      {
-        "source": "CBR",
-        "status": "SUCCESS",
-        "at": "2026-08-31T11:45:07.802277+00:00",
-        "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "FAILED",
-        "at": "2026-08-31T11:45:06.517595+00:00",
-        "rows": 0
       }
     ]
   }
