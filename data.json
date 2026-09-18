@@ -70,18 +70,24 @@
   },
   "l2": {
     "current": {
-      "date": "2026-09-17",
-      "regime": "Neutral",
-      "multiplier": 1.0,
-      "wms": 3.0
+      "date": "2026-09-18",
+      "regime": "Risk-on",
+      "multiplier": 1.2,
+      "wms": 0.0
     },
     "scores": {
       "volatility": 0,
       "credit": 0,
-      "liquidity": 1,
+      "liquidity": 0,
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-09-18",
+        "regime": "Risk-on",
+        "wms": 0.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-09-17",
         "regime": "Neutral",
@@ -1729,13 +1735,13 @@
     }
   ],
   "bonds": {
-    "date": "2026-09-17",
+    "date": "2026-09-18",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 14.0,
-      "ruonia": 14.22,
+      "ruonia": 14.15,
       "cpi_yoy": 6.33,
       "real_yield": null,
       "rgbi_index": null
@@ -1751,7 +1757,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-09-17",
+    "updated_at": "2026-09-18",
     "calc_versions": {
       "L1": {
         "id": 1,
@@ -1772,6 +1778,18 @@
     },
     "last_etl": [
       {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-09-18T19:06:25.799978+00:00",
+        "rows": 4
+      },
+      {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-09-18T19:06:25.092108+00:00",
+        "rows": 50
+      },
+      {
         "source": "MOEX",
         "status": "SUCCESS",
         "at": "2026-09-17T19:47:30.579742+00:00",
@@ -1787,18 +1805,6 @@
         "source": "CBR",
         "status": "SUCCESS",
         "at": "2026-09-16T19:38:38.362485+00:00",
-        "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-09-16T19:38:37.368513+00:00",
-        "rows": 50
-      },
-      {
-        "source": "CBR",
-        "status": "SUCCESS",
-        "at": "2026-09-15T19:46:32.328804+00:00",
         "rows": 4
       }
     ]
