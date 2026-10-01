@@ -1,22 +1,29 @@
 {
   "l1": {
     "current": {
-      "month": "2026-09-01",
+      "month": "2026-10-01",
       "regime": "Reflation",
       "risk_cap": "80%",
       "growth_v5": 0.0,
-      "monet_v5": 1.002
+      "monet_v5": 0.967
     },
     "indicators": {
       "pmi": null,
-      "cpi_yoy": 5.98,
+      "cpi_yoy": 6.33,
       "key_rate": null,
-      "imoex": 2857.74,
-      "rgbi": 119.79,
+      "imoex": null,
+      "rgbi": null,
       "bcom": null,
       "urals": null
     },
     "history": [
+      {
+        "month": "2026-10-01",
+        "regime": "Reflation",
+        "risk_cap": "80%",
+        "growth_v5": 0.0,
+        "monet_v5": 0.967
+      },
       {
         "month": "2026-09-01",
         "regime": "Reflation",
@@ -1783,7 +1790,7 @@
     }
   ],
   "bonds": {
-    "date": "2026-09-30",
+    "date": "2026-10-01",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
@@ -1805,7 +1812,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-09-30",
+    "updated_at": "2026-10-01",
     "calc_versions": {
       "L1": {
         "id": 1,
