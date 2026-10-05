@@ -1802,7 +1802,7 @@
     }
   ],
   "bonds": {
-    "date": "2026-10-02",
+    "date": "2026-10-05",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
@@ -1824,7 +1824,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-10-02",
+    "updated_at": "2026-10-05",
     "calc_versions": {
       "L1": {
         "id": 1,
