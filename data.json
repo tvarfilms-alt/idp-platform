@@ -77,9 +77,9 @@
   },
   "l2": {
     "current": {
-      "date": "2026-10-06",
-      "regime": "Neutral",
-      "multiplier": 1.0,
+      "date": "2026-10-07",
+      "regime": "Risk-on",
+      "multiplier": 1.2,
       "wms": 0.0
     },
     "scores": {
@@ -89,6 +89,12 @@
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-10-07",
+        "regime": "Risk-on",
+        "wms": 0.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-10-06",
         "regime": "Neutral",
@@ -1814,13 +1820,13 @@
     }
   ],
   "bonds": {
-    "date": "2026-10-06",
+    "date": "2026-10-07",
     "market": {
       "gbi_ytm": null,
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 14.0,
-      "ruonia": 13.77,
+      "ruonia": 13.66,
       "cpi_yoy": 6.33,
       "real_yield": null,
       "rgbi_index": null
@@ -1836,7 +1842,7 @@
     }
   },
   "meta": {
-    "updated_at": "2026-10-06",
+    "updated_at": "2026-10-07",
     "calc_versions": {
       "L1": {
         "id": 1,
@@ -1858,6 +1864,18 @@
     "last_etl": [
       {
         "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-10-07T21:28:15.258348+00:00",
+        "rows": 50
+      },
+      {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-10-07T21:28:15.258342+00:00",
+        "rows": 4
+      },
+      {
+        "source": "MOEX",
         "status": "FAILED",
         "at": "2026-10-06T21:07:21.552357+00:00",
         "rows": 0
@@ -1873,18 +1891,6 @@
         "status": "SUCCESS",
         "at": "2026-10-05T22:50:37.509105+00:00",
         "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-10-05T22:50:36.646531+00:00",
-        "rows": 50
-      },
-      {
-        "source": "MOEX",
-        "status": "PARTIAL",
-        "at": "2026-10-05T12:30:35.963998+00:00",
-        "rows": 3
       }
     ]
   }
