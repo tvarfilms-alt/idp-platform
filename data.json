@@ -84,7 +84,7 @@
   },
   "l2": {
     "current": {
-      "date": "2026-11-11",
+      "date": "2026-11-12",
       "regime": "Risk-on",
       "multiplier": 1.2,
       "wms": 0.0
@@ -96,6 +96,12 @@
       "correlation": 0
     },
     "history": [
+      {
+        "date": "2026-11-12",
+        "regime": "Risk-on",
+        "wms": 0.0,
+        "multiplier": 1.2
+      },
       {
         "date": "2026-11-11",
         "regime": "Risk-on",
@@ -1977,7 +1983,7 @@
       "cbi_ytm": null,
       "g_spread": null,
       "key_rate": 14.0,
-      "ruonia": 13.81,
+      "ruonia": 13.92,
       "cpi_yoy": 6.35,
       "real_yield": null,
       "rgbi_index": null
@@ -2014,6 +2020,18 @@
     },
     "last_etl": [
       {
+        "source": "CBR",
+        "status": "SUCCESS",
+        "at": "2026-11-12T22:23:32.820286+00:00",
+        "rows": 4
+      },
+      {
+        "source": "MOEX",
+        "status": "SUCCESS",
+        "at": "2026-11-12T22:23:30.238251+00:00",
+        "rows": 50
+      },
+      {
         "source": "MOEX",
         "status": "SUCCESS",
         "at": "2026-11-11T22:55:01.900435+00:00",
@@ -2029,18 +2047,6 @@
         "source": "CBR",
         "status": "SUCCESS",
         "at": "2026-11-10T21:52:47.022808+00:00",
-        "rows": 4
-      },
-      {
-        "source": "MOEX",
-        "status": "SUCCESS",
-        "at": "2026-11-10T21:52:42.399227+00:00",
-        "rows": 50
-      },
-      {
-        "source": "CBR",
-        "status": "SUCCESS",
-        "at": "2026-11-10T00:21:21.583211+00:00",
         "rows": 4
       }
     ]
